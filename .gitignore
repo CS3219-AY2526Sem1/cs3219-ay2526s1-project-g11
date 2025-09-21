@@ -99,6 +99,7 @@ dmypy.json
 .pyre/
 .pytype/
 cython_debug/
+.ruff_cache/
 
 # Go / Gin
 # Binaries for programs and plugins
