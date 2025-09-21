@@ -24,7 +24,7 @@ jobs:
         run: uv sync
 
       - name: Lint
-        uses: uv run ruff check ./backend/ai-service
+        run: uv run ruff check ./backend/ai-service
         continue-on-error: true
 
       - name: Build
