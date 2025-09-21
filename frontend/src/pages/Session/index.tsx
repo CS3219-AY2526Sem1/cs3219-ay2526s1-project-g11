@@ -7,7 +7,7 @@ export const Session = () => {
       <div className="flex-3">
         <SessionQuestion />
       </div>
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <SessionChat />
       </div>
     </div>
