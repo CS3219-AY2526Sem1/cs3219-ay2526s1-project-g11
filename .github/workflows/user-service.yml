@@ -22,10 +22,13 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: backend/user-service
 
       - name: Lint
         run: npm run lint
+        working-directory: backend/user-service
         continue-on-error: true
 
       - name: Build
         run: npm run build
+        working-directory: backend/user-service
