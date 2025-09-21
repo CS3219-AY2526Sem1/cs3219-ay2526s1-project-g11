@@ -8,7 +8,7 @@ export const Header = () => {
   const { user, logout } = useAuth();
 
   return (
-    <header className="bg-white p-4 border-b border-gray-200 flex items-center justify-start gap-2">
+    <header className="bg-white/30 backdrop-blur-sm p-4 border-b border-gray-200 flex items-center justify-start gap-2 sticky top-0 z-10">
       <span className="w-10 h-10 rounded-xl bg-blue-500 text-white font-semibold text-xs flex items-center justify-center">
         <CodeXmlIcon className="h-5 w-5" />
       </span>
