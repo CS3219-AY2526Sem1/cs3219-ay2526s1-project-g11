@@ -6,11 +6,13 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { Header } from "./components/Header";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <BrowserRouter>
+        <Header />
         <Routes>
           <Route
             path="/"
