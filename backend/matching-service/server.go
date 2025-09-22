@@ -7,6 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func healthCheck(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Matching service is running",
+	})
+}
+
 func enterQueue(c *gin.Context) {
 	id, err := rand.Int(rand.Reader, big.NewInt(9999))
 	if err != nil {
@@ -34,6 +40,7 @@ func deleteUserFromQueue(c *gin.Context) {
 
 func main() {
 	router := gin.Default()
+	router.GET("/health", healthCheck)
 	router.POST("/match/request", enterQueue)
 	router.GET("/match/status/:matchId", checkQueueStatus)
 	router.DELETE("/match/cancel/:matchId", deleteUserFromQueue)
