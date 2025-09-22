@@ -39,13 +39,19 @@ func deleteUserFromQueue(c *gin.Context) {
 	})
 }
 
+// setupRouter builds and returns the Gin engine with all routes.
+func setupRouter() *gin.Engine {
+	r := gin.Default()
+	r.GET("/health", healthCheck)
+	r.POST("/match/request", enterQueue)
+	r.GET("/match/status/:matchId", checkQueueStatus)
+	r.DELETE("/match/cancel/:matchId", deleteUserFromQueue)
+	return r
+}
+
 func main() {
-	router := gin.Default()
-	router.GET("/health", healthCheck)
-	router.POST("/match/request", enterQueue)
-	router.GET("/match/status/:matchId", checkQueueStatus)
-	router.DELETE("/match/cancel/:matchId", deleteUserFromQueue)
-	if err := router.Run("localhost:8080"); err != nil {
+	router := setupRouter()
+	if err := router.Run(":8080"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
