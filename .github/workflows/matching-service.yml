@@ -18,7 +18,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: 1.22.x
 
       - name: Install dependencies
         run: go mod download
@@ -29,10 +29,10 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.65.0
-        working-directory: backend/matching-service
+          working-directory: backend/matching-service
         continue-on-error: true
 
       - name: Build
-        run: go build -o matching-service ./backend/matching-service
+        run: go build -o matching-service .
         working-directory: backend/matching-service
         continue-on-error: true
