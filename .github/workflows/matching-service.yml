@@ -38,5 +38,5 @@ jobs:
         working-directory: backend/matching-service
 
       - name: Run tests
-        run: go test -v .
+        run: go test -v ./...
         working-directory: backend/matching-service
