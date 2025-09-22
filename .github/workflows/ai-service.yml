@@ -55,3 +55,14 @@ jobs:
           print('✅ Health endpoint works')
           "
         working-directory: backend/ai-service
+
+
+uv run python -c "
+try:
+  from app.main import app
+  print('✅ FastAPI app imports successfully')
+  print(f'✅ App title: {app.title}')
+except Exception as e:
+  print(f'❌ Import failed: {e}')
+  exit(1)
+"
