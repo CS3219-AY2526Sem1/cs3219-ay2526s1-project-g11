@@ -33,7 +33,7 @@ jobs:
         run: |
           uv run python -c "
           try:
-              from main import app
+              from app.main import app
               print('✅ FastAPI app imports successfully')
               print(f'✅ App title: {app.title}')
           except Exception as e:
