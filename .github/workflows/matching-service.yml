@@ -36,12 +36,3 @@ jobs:
       - name: Build
         run: go build -o .
         working-directory: backend/matching-service
-
-      - name: Test API endpoints (basic)
-        run: |
-          go run server.go
-          curl http://localhost:8080/health
-          assert response.status_code == 200, 'Health endpoint failed'
-          print('✅ Health endpoint works')
-          "
-        working-directory: backend/matching-service
