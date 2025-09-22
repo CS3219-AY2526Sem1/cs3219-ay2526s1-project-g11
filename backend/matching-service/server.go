@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rand"
+	"log"
 	"math/big"
 
 	"github.com/gin-gonic/gin"
@@ -44,5 +45,7 @@ func main() {
 	router.POST("/match/request", enterQueue)
 	router.GET("/match/status/:matchId", checkQueueStatus)
 	router.DELETE("/match/cancel/:matchId", deleteUserFromQueue)
-	router.Run("localhost:8080")
+	if err := router.Run("localhost:8080"); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
