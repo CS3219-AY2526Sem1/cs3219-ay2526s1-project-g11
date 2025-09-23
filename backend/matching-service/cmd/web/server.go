@@ -8,6 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func root(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Matching service is running",
+	})
+}
+
 func healthCheck(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Matching service is running",
@@ -42,6 +48,7 @@ func deleteUserFromQueue(c *gin.Context) {
 // setupRouter builds and returns the Gin engine with all routes.
 func setupRouter() *gin.Engine {
 	r := gin.Default()
+	r.GET("/", root)
 	r.GET("/health", healthCheck)
 	r.POST("/match/request", enterQueue)
 	r.GET("/match/status/:matchId", checkQueueStatus)
