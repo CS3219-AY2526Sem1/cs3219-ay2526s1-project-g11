@@ -34,7 +34,7 @@ jobs:
         continue-on-error: true
 
       - name: Build
-        run: go build -o .
+        run: mkdir -p bin && go build -o bin/matching-service ./cmd/web
         working-directory: backend/matching-service
 
       - name: Run tests
