@@ -1,0 +1,130 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>two-user editor (delta + rev)</title>
+<textarea id="editor" style="width:90vw;height:55vh;"></textarea>
+<pre id="log" style="white-space:pre-wrap"></pre>
+<script type="module">
+  import {Socket} from "https://cdn.skypack.dev/phoenix@1.7.11";
+
+  const token = "";
+  const sessionId = "abc";
+
+  const log = (m) => document.querySelector("#log").textContent += m + "\n";
+  const ed  = document.querySelector("#editor");
+
+  const socket = new Socket("ws://localhost:4000/ws", { params: { token } });
+  socket.connect();
+
+  const chan = socket.channel(`session:${sessionId}`);
+
+  // compute a minimal {from,to,text} by LCP/LCSuffix against previous value
+  function diff(oldS, newS) {
+    if (oldS === newS) return {from: 0, to: 0, text: ""};
+    let start = 0;
+    while (start < oldS.length && start < newS.length && oldS[start] === newS[start]) start++;
+    let oldEnd = oldS.length - 1;
+    let newEnd = newS.length - 1;
+    while (oldEnd >= start && newEnd >= start && oldS[oldEnd] === newS[newEnd]) { oldEnd--; newEnd--; }
+    const from = start;
+    const to   = oldEnd + 1; // slice is [from,to)
+    const text = newS.slice(start, newEnd + 1);
+    return {from, to, text};
+  }
+
+  let rev = 0;
+  let shadow = "";   // last text we believe server has
+  let localApply = false;
+  let myUserId = null;
+
+  chan.join()
+    .receive("ok", (response) => { 
+      console.log("Join response:", response); // Debug log
+      rev = response.rev || 0;
+      shadow = response.text || ""; 
+      ed.value = shadow;
+      
+      // Use server's user_id if provided, otherwise keep our generated one
+      if (response.user_id) {
+        myUserId = response.user_id;
+      }
+      
+      log(`joined rev=${rev}, user_id=${myUserId}`);
+      log(`myUserId type: ${typeof myUserId}, value: ${JSON.stringify(myUserId)}`);
+    })
+    .receive("error", e => log("join error " + JSON.stringify(e)));
+
+  // on local input, compute delta vs shadow and push with rev
+  ed.addEventListener("input", () => {
+    if (localApply) return; // prevent loops on remote apply
+    const {from, to, text} = diff(shadow, ed.value);
+    
+    // Only send if there's actually a change
+    if (from === to && text === "") return;
+    
+    log(`sending delta: rev=${rev}, from=${from}, to=${to}, text="${text}"`);
+    chan.push("code:delta", { from, to, text, rev });
+    
+    // Update shadow optimistically so next diff is computed correctly
+    // If server rejects this, we'll get a snapshot to correct it
+    shadow = ed.value;
+  });
+
+  // server accepted some client's delta → update shadow & editor
+  chan.on("code:update", (response) => {
+    console.log("Update response:", response); // Debug log
+    const {rev: newRev, delta, by} = response;
+    log(`received update: rev=${newRev}, delta=${JSON.stringify(delta)}, by=${by}`);
+    log(`comparing by=${JSON.stringify(by)} !== myUserId=${JSON.stringify(myUserId)}: ${by !== myUserId}`);
+    
+    // Update our revision number
+    rev = newRev;
+    
+    // Only apply to editor if it's NOT from us
+    if (by !== myUserId) {
+      // Apply remote operation to editor
+      const v = ed.value;
+      const left  = v.slice(0, delta.from);
+      const right = v.slice(delta.to);
+      localApply = true;
+      ed.value = left + delta.text + right;
+      localApply = false;
+      
+      // Update shadow to match the server's authoritative state
+      const sLeft  = shadow.slice(0, delta.from);
+      const sRight = shadow.slice(delta.to);
+      shadow = sLeft + delta.text + sRight;
+      
+      log(`applied remote operation from ${by}, new rev=${rev}`);
+    } else {
+      // This is our own operation coming back from server
+      const expectedEditor = shadow; // Shadow should match editor since we updated it optimistically
+      if (ed.value !== expectedEditor) {
+        log(`editor/shadow mismatch: editor="${ed.value}", shadow="${shadow}"`);
+        // Trust the shadow (it was updated optimistically) and fix editor if needed
+        localApply = true;
+        ed.value = shadow;
+        localApply = false;
+      }
+      log(`confirmed own operation, rev=${rev}, editor and shadow in sync`);
+    }
+  });
+
+  // our rev was stale → replace with snapshot then keep typing
+  chan.on("code:snapshot", ({rev: newRev, text}) => {
+    log(`received snapshot: rev=${newRev}`);
+    localApply = true;
+    ed.value = text;
+    localApply = false;
+    shadow = text;
+    rev = newRev;
+    log(`snapshot applied, new rev=${rev}`);
+  });
+
+  chan.on("code:error", ({reason}) => log("error: " + reason));
+  
+  chan.on("code:stale", _ => {
+    log("stale → awaiting snapshot");
+    // Request a snapshot
+    chan.push("code:request_snapshot", {});
+  });
+</script>
