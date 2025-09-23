@@ -9,6 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func init() {
+	if os.Getenv("APP_ENV") == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+}
+
 func root(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Matching service is running",
@@ -63,7 +69,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	if err := router.Run(":" + port); err != nil {
+	if err := router.Run("0.0.0.0:" + port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
