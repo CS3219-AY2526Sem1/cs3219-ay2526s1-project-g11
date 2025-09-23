@@ -225,3 +225,6 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+
+# Development files
+.dev/
