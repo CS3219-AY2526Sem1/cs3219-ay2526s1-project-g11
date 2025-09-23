@@ -27,6 +27,11 @@ class AIResponse(BaseModel):
     confidence: Optional[float] = None
 
 
+@app.get("/")
+async def root():
+    return {"message": "AI Service is up. See /health"}
+
+
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     return HealthResponse(status="healthy", message="AI Service is running")
@@ -34,7 +39,7 @@ async def health_check():
 
 @app.post("/ai/generate", response_model=AIResponse)
 async def generate_response(request: AIRequest):
-    prompt = request.prompt + request.context
+    prompt = request.prompt if request.context is None else f"{request.prompt}{request.context}"
     client = get_gemini_client()
     response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
     return AIResponse(response=response.text, confidence=0.85)
@@ -42,4 +47,5 @@ async def generate_response(request: AIRequest):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
