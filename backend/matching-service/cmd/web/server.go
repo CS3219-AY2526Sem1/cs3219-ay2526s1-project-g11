@@ -10,12 +10,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func init() {
-	if os.Getenv("APP_ENV") == "production" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-}
-
 func root(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Matching service is running",
@@ -65,17 +59,19 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("No .env file found")
+	_ = godotenv.Load(".env") // non-fatal if missing
+	appEnv := os.Getenv("APP_ENV")
+	if appEnv == "production" {
+		gin.SetMode(gin.ReleaseMode)
 	}
+	log.Println("APP_ENV: " + appEnv)
 	router := setupRouter()
 	port := os.Getenv("PORT")
 	if port == "" {
-		log.Println("PORT is not set, using default port 8080")
 		port = "8080"
 	}
-	if err := router.Run(":" + port); err != nil {
+	log.Printf("listening on :%s", port)
+	if err := router.Run("0.0.0.0:" + port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
