@@ -75,7 +75,7 @@ func main() {
 		log.Println("PORT is not set, using default port 8080")
 		port = "8080"
 	}
-	if err := router.Run("0.0.0.0:" + port); err != nil {
+	if err := router.Run(":" + port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
