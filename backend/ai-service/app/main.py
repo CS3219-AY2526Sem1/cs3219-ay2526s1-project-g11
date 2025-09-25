@@ -7,6 +7,8 @@ from google import genai
 app = FastAPI(title="AI Service", version="1.0.0")
 load_dotenv()
 
+system_prompt = "You are a helpful assistant that can answer questions and help with tasks related to algorithms and data structures problems."
+
 
 def get_gemini_client():
     return genai.Client()
@@ -39,7 +41,11 @@ async def health_check():
 
 @app.post("/ai/generate", response_model=AIResponse)
 async def generate_response(request: AIRequest):
-    prompt = request.prompt if request.context is None else f"{request.prompt}{request.context}"
+    prompt = (
+        request.prompt
+        if request.context is None
+        else f"{system_prompt}{request.prompt}{request.context}"
+    )
     client = get_gemini_client()
     response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
     return AIResponse(response=response.text, confidence=0.85)
