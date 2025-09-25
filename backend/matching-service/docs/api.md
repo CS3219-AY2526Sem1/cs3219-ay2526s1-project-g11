@@ -30,11 +30,11 @@ Base URL: `http://localhost:8080`
   }
   ```
 
-### Check Match Status
+### Check Match Status (by matchId)
 - **GET** `/match/status/:id`
 - **Path Params**:
-  - `id`: match ID returned from Request Match
-- **200 Response**:
+  - `id`: the `matchId` returned from Request Match
+- **200 Response** (when found):
 ```json
 {
   "matchId": "match:algorithms,graphs:1727282828123456000",
@@ -42,7 +42,10 @@ Base URL: `http://localhost:8080`
   "status": "matched"
 }
 ```
-- **404** if not found or expired
+- **404 Response** (when not found):
+```json
+{ "error": "not found" }
+```
 
 ### Check Match Status By User
 - **GET** `/match/status/by-user/:userId`
@@ -62,13 +65,24 @@ Base URL: `http://localhost:8080`
   { "status": 0 }
   ```
 
-### Cancel Match
+### Cancel Match (by matchId)
 - **DELETE** `/match/cancel/:id`
-- **Path Params**:
-  - `id`: match ID to cancel
 - **200 Response**:
 ```json
 { "status": "cancelled" }
+```
+
+### Cancel Match (by userId)
+- **DELETE** `/match/cancel/by-user/:userId`
+- **200 Response** (state varies):
+```json
+{ "status": "cancelled_matched", "matchId": "match:..." }
+```
+```json
+{ "status": "cancelled_waiting", "matchId": null }
+```
+```json
+{ "status": "not_found", "matchId": null }
 ```
 
 ### Notes
@@ -82,7 +96,7 @@ curl -s -X POST http://localhost:8080/match/request \
   -H 'Content-Type: application/json' \
   -d '{"topics":["algorithms","graphs"],"difficulty":"easy","userId":"u1"}'
 
-# Check match status
+# Check match status by matchId
 curl -s http://localhost:8080/match/status/<matchId>
 
 # Check match status by userId
@@ -94,5 +108,3 @@ curl -s -X DELETE http://localhost:8080/match/cancel/<matchId>
 # Cancel a match by userId (works when waiting or matched)
 curl -s -X DELETE http://localhost:8080/match/cancel/by-user/<userId>
 ```
-
-
