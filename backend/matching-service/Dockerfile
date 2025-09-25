@@ -20,6 +20,9 @@ ARG TARGETARCH=amd64
 RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags "-s -w" -o /out/matching-service ./cmd/web
 
+# Tiny wget provider for healthcheck
+FROM busybox:1.36.1-musl AS bb
+
 # Runtime stage
 FROM gcr.io/distroless/static-debian12
 
@@ -28,6 +31,12 @@ USER nonroot:nonroot
 
 # Copy binary
 COPY --from=builder /out/matching-service /app/matching-service
+
+# Copy busybox just for healthcheck wget
+COPY --from=bb /bin/busybox /busybox
+
+# Optional healthcheck hitting /health
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["/busybox","wget","-qO-","http://127.0.0.1:8080/health"]
 
 EXPOSE 8080
 
