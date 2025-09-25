@@ -1,0 +1,123 @@
+package services
+
+import (
+	"context"
+	"fmt"
+	"matching-service/internal/models"
+	"matching-service/internal/repository"
+	"sort"
+	"strings"
+	"time"
+)
+
+type MatchingService struct {
+	repo *repository.MatchRepository
+}
+
+const defaultTTL = 10 * time.Minute
+
+func buildQueueKey(topics []string, difficulty string) (joined string, queueKey string) {
+	copyTopics := append([]string{}, topics...)
+	sort.Strings(copyTopics)
+	joined = strings.Join(copyTopics, ",")
+	queueKey = fmt.Sprintf("queue:%s:%s", joined, difficulty)
+	return
+}
+
+func NewMatchingService(repo *repository.MatchRepository) *MatchingService {
+	return &MatchingService{repo: repo}
+}
+
+func (s *MatchingService) RequestMatch(ctx context.Context, req models.MatchRequest) (*models.MatchResponse, error) {
+	joined, queueKey := buildQueueKey(req.Topics, req.Difficulty)
+	if err := s.repo.Enqueue(ctx, queueKey, req.UserID); err != nil {
+		return nil, err
+	}
+	// Save user's queue association so we can report waiting status by userId
+	_ = s.repo.SaveUserQueue(ctx, req.UserID, queueKey, defaultTTL)
+
+	users, err := s.repo.PopTwo(ctx, queueKey)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(users) < 2 {
+		return &models.MatchResponse{Status: "waiting"}, nil
+	}
+
+	matchID := fmt.Sprintf("match:%s:%d", joined, time.Now().UnixNano())
+	if err := s.repo.SaveMatch(ctx, matchID, users[1], defaultTTL); err != nil {
+		return nil, err
+	}
+	// Save reverse lookup so either user can poll by userId
+	if err := s.repo.SaveUserMatch(ctx, users[0], matchID, defaultTTL); err != nil {
+		return nil, err
+	}
+	if err := s.repo.SaveUserMatch(ctx, users[1], matchID, defaultTTL); err != nil {
+		return nil, err
+	}
+	return &models.MatchResponse{
+		MatchID:   matchID,
+		PartnerID: users[1],
+		Status:    "matched",
+	}, nil
+}
+
+func (s *MatchingService) CheckMatchStatus(ctx context.Context, matchID string) (*models.MatchResponse, error) {
+	match, err := s.repo.GetMatch(ctx, matchID)
+	if err != nil {
+		return nil, err
+	}
+	return match, nil
+}
+
+func (s *MatchingService) CancelMatch(ctx context.Context, matchID string) error {
+	return s.repo.CancelMatch(ctx, matchID)
+}
+
+func (s *MatchingService) CheckUserMatch(ctx context.Context, userID string) (string, error) {
+	return s.repo.GetUserMatch(ctx, userID)
+}
+
+// CancelByUser cancels either a waiting user (removes from queue) or a matched user (removes match and mappings)
+func (s *MatchingService) CancelByUser(ctx context.Context, userID string) (string, *models.MatchResponse, error) {
+	if matchID, err := s.repo.GetUserMatch(ctx, userID); err == nil && matchID != "" {
+		// Matched case: remove match and both user mappings
+		if err := s.repo.CancelMatch(ctx, matchID); err != nil {
+			return "", nil, err
+		}
+		// Best-effort: remove user match mappings (ignore errors)
+		_ = s.repo.SaveUserMatch(ctx, userID, "", 0)
+		return "cancelled_matched", &models.MatchResponse{MatchID: matchID, Status: "cancelled"}, nil
+	}
+	if queueKey, err := s.repo.GetUserQueue(ctx, userID); err == nil && queueKey != "" {
+		if err := s.repo.RemoveFromQueue(ctx, queueKey, userID); err != nil {
+			return "", nil, err
+		}
+		// Best-effort: clear queue mapping
+		_ = s.repo.SaveUserQueue(ctx, userID, "", 0)
+		return "cancelled_waiting", &models.MatchResponse{Status: "cancelled"}, nil
+	}
+	return "not_found", &models.MatchResponse{Status: "not_found"}, nil
+}
+
+// CheckUserStatus returns (statusCode, details)
+// status 2: matched -> details["matchId"]
+// status 1: waiting -> details["queue"], details["position"] (0-based)
+// status 0: not in queue and not matched
+func (s *MatchingService) CheckUserStatus(ctx context.Context, userID string) (int, map[string]any, error) {
+	if matchID, err := s.repo.GetUserMatch(ctx, userID); err == nil && matchID != "" {
+		return 2, map[string]any{"matchId": matchID}, nil
+	}
+	queueKey, err := s.repo.GetUserQueue(ctx, userID)
+	if err == nil && queueKey != "" {
+		rank, rerr := s.repo.GetUserQueueRank(ctx, queueKey, userID)
+		if rerr != nil {
+			return 1, map[string]any{"queue": queueKey}, nil
+		}
+		if rank >= 0 {
+			return 1, map[string]any{"queue": queueKey, "position": rank}, nil
+		}
+	}
+	return 0, nil, nil
+}
