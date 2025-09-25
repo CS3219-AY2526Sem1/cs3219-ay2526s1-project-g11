@@ -36,5 +36,5 @@ export const FieldInput = React.forwardRef<HTMLInputElement, FieldInputProps>(
         )}
       </div>
     );
-  }
+  },
 );

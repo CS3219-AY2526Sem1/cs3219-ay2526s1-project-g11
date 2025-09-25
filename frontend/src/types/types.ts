@@ -15,3 +15,8 @@ export interface LoginResponse {
   message: string;
   data: User & { accessToken: string };
 }
+
+export interface SignupResponse {
+  message: string;
+  data: User;
+}
