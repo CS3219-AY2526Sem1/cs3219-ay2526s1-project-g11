@@ -1,5 +1,9 @@
 import axios, { AxiosHeaders, AxiosResponse } from "axios";
-import { LoginResponse, VerifyTokenResponse } from "../types/types";
+import {
+  LoginResponse,
+  SignupResponse,
+  VerifyTokenResponse,
+} from "../types/types";
 
 const apiClient = axios.create({
   baseURL: "http://localhost:3001",
@@ -12,7 +16,7 @@ const userServiceApiRequest = async <T>(
   url: string,
   method: "GET" | "POST" | "PUT" | "DELETE",
   data?: any,
-  headers?: any
+  headers?: any,
 ): Promise<T> => {
   const response: AxiosResponse<T> = await apiClient({
     method,
@@ -35,7 +39,7 @@ export const verifyToken = async ({
     {},
     {
       Authorization: `Bearer ${token}`,
-    }
+    },
   );
 };
 
@@ -47,6 +51,25 @@ export const userLogin = async ({
   password: string;
 }) => {
   return await userServiceApiRequest<LoginResponse>("/auth/login", "POST", {
+    email,
+    password,
+  });
+};
+
+export const userSignup = async ({
+  name,
+  username,
+  email,
+  password,
+}: {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+}) => {
+  return await userServiceApiRequest<SignupResponse>("/users", "POST", {
+    name,
+    username,
     email,
     password,
   });
