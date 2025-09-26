@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { Link, useNavigate } from "react-router";
 import { userLogin } from "../../api/UserService";
@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { LoginResponse } from "../../types/types";
 import { AxiosError } from "axios";
 import { FieldInput } from "../../components/FieldInput";
+import { SubmitButton } from "../../components/SubmitButton";
 
 // Tool: Claude (model: Sonnet 4), date: 2025‑09‑21
 // Scope: Generated a very basic login screen with no logic
@@ -14,7 +15,6 @@ import { FieldInput } from "../../components/FieldInput";
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -75,13 +75,7 @@ const Login = () => {
               password
             />
             <p className="text-sm text-red-500">{error}</p>
-            <button
-              disabled={mutation.isPending}
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              Sign In
-            </button>
+            <SubmitButton disabled={mutation.isPending}>Sign Up</SubmitButton>
             <p className="text-center">
               Don't have an account?{" "}
               <Link

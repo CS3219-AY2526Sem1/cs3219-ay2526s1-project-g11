@@ -3,15 +3,16 @@ import { Mail, Lock, User, Contact } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { userLogin, userSignup } from "../../api/UserService";
 import { useMutation } from "@tanstack/react-query";
-import { LoginResponse, SignupResponse } from "../../types/types";
+import { LoginResponse } from "../../types/types";
 import { AxiosError } from "axios";
 import { FieldInput } from "../../components/FieldInput";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useAuth } from "../../context/AuthContext";
+import { SubmitButton } from "../../components/SubmitButton";
 
-const signupSchema = z
+const signupFormSchema = z
   .object({
     name: z.string().min(1, "Name is required"),
     username: z.string().min(1, "Name is required"),
@@ -29,7 +30,7 @@ const signupSchema = z
     }
   });
 
-type signupForm = z.infer<typeof signupSchema>;
+type signupForm = z.infer<typeof signupFormSchema>;
 
 const Signup = () => {
   const { login } = useAuth();
@@ -41,7 +42,7 @@ const Signup = () => {
     getValues,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(signupSchema),
+    resolver: zodResolver(signupFormSchema),
   });
 
   const [error, setError] = useState("");
@@ -68,8 +69,7 @@ const Signup = () => {
     },
   });
 
-  const onSubmit: SubmitHandler<z.infer<typeof signupSchema>> = (data) =>
-    mutation.mutate(data);
+  const onSubmit: SubmitHandler<signupForm> = (data) => mutation.mutate(data);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -81,39 +81,30 @@ const Signup = () => {
             </h2>
             <p className="text-gray-600">Please fill in your details below</p>
           </div>
-
           <div className="space-y-6">
             <FieldInput
-              icon={
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              }
+              icon={<User />}
               {...register("name")}
               type="text"
               placeholder="Name"
               required
             />
             <FieldInput
-              icon={
-                <Contact className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              }
+              icon={<Contact />}
               type="text"
               placeholder="Username"
               {...register("username")}
               required
             />
             <FieldInput
-              icon={
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              }
+              icon={<Mail />}
               type="email"
               placeholder="Email"
               {...register("email")}
               required
             />
             <FieldInput
-              icon={
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              }
+              icon={<Lock />}
               type="password"
               placeholder="Password"
               {...register("password")}
@@ -121,9 +112,7 @@ const Signup = () => {
               password
             />
             <FieldInput
-              icon={
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              }
+              icon={<Lock />}
               type="password"
               placeholder="Confirm Password"
               {...register("confirmPassword")}
@@ -133,13 +122,7 @@ const Signup = () => {
             <p className="text-sm text-red-500">
               {error || errors.password?.message}
             </p>
-            <button
-              disabled={mutation.isPending}
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              Sign Up
-            </button>
+            <SubmitButton disabled={mutation.isPending}>Sign Up</SubmitButton>
             <p className="text-center">
               Already have an accoint?{" "}
               <Link
