@@ -18,28 +18,24 @@ const userServiceApiRequest = async <T>(
   data?: any,
   headers?: any,
 ): Promise<T> => {
+  const token = localStorage.getItem("authToken");
   const response: AxiosResponse<T> = await apiClient({
     method,
     url,
     data,
-    headers,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...headers,
+    },
   });
 
   return response.data;
 };
 
-export const verifyToken = async ({
-  token,
-}: {
-  token: string;
-}): Promise<VerifyTokenResponse> => {
+export const verifyToken = async (): Promise<VerifyTokenResponse> => {
   return await userServiceApiRequest<VerifyTokenResponse>(
     "/auth/verify-token",
     "GET",
-    {},
-    {
-      Authorization: `Bearer ${token}`,
-    },
   );
 };
 
@@ -81,14 +77,12 @@ export const userUpdate = async ({
   username,
   email,
   password,
-  token,
 }: {
   userId: string;
   name?: string;
   username?: string;
   email?: string;
   password?: string;
-  token: string;
 }) => {
   return await userServiceApiRequest<SignupResponse>(
     `/users/${userId}`,
@@ -98,9 +92,6 @@ export const userUpdate = async ({
       username,
       email,
       password,
-    },
-    {
-      Authorization: `Bearer ${token}`,
     },
   );
 };

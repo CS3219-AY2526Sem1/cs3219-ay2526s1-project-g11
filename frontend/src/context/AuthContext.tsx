@@ -7,7 +7,6 @@ interface AuthContextType {
   user: User | null;
   login: (user: LoginResponse) => void;
   logout: () => void;
-  getToken: () => string;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -22,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (token) {
       try {
-        const verification = await verifyToken({ token });
+        const verification = await verifyToken();
         setIsAuthenticated(true);
         setUser(verification.data);
       } catch {
@@ -48,19 +47,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
-  const getToken = () => {
-    const token = localStorage.getItem("authToken");
-    return token || "";
-  };
-
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <AuthContext.Provider
-      value={{ isAuthenticated, user, login, logout, getToken }}
-    >
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
