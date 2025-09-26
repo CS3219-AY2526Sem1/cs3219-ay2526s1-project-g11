@@ -14,7 +14,7 @@ const apiClient = axios.create({
 
 const userServiceApiRequest = async <T>(
   url: string,
-  method: "GET" | "POST" | "PUT" | "DELETE",
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
   data?: any,
   headers?: any,
 ): Promise<T> => {
@@ -73,4 +73,34 @@ export const userSignup = async ({
     email,
     password,
   });
+};
+
+export const userUpdate = async ({
+  userId,
+  name,
+  username,
+  email,
+  password,
+  token,
+}: {
+  userId: string;
+  name?: string;
+  username?: string;
+  email?: string;
+  password?: string;
+  token: string;
+}) => {
+  return await userServiceApiRequest<SignupResponse>(
+    `/users/${userId}`,
+    "PATCH",
+    {
+      name,
+      username,
+      email,
+      password,
+    },
+    {
+      Authorization: `Bearer ${token}`,
+    },
+  );
 };

@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   login: (user: LoginResponse) => void;
   logout: () => void;
+  getToken: () => string;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -47,12 +48,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
+  const getToken = () => {
+    const token = localStorage.getItem("authToken");
+    return token || "";
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, user, login, logout, getToken }}
+    >
       {children}
     </AuthContext.Provider>
   );
