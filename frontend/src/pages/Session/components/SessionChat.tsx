@@ -42,7 +42,7 @@ export const SessionChat = () => {
                 {
                   "bg-blue-500 text-white ml-auto": msg.userId === user?.id,
                   "bg-gray-100 text-black": msg.userId !== user?.id,
-                }
+                },
               )}
             >
               {msg.text}
