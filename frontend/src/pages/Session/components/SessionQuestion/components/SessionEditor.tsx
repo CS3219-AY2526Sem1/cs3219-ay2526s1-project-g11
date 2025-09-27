@@ -3,11 +3,13 @@ import { PlayIcon, UsersIcon } from "lucide-react";
 import type { editor } from "monaco-editor";
 import { type Channel, Socket } from "phoenix";
 import { useCallback, useEffect, useRef } from "react";
+import { useLocation } from "react-router";
 import { useAuth } from "../../../../../context/AuthContext";
 import type {
 	CodeUpdateResponse,
 	SessionJoinResponse,
 } from "../../../../../types/types";
+import { WEBSOCKET_URL } from "../../../../../urls";
 import { computeCodeDiff } from "../../../../../utils";
 
 interface SessionEditorProps {
@@ -19,6 +21,9 @@ export const SessionEditor = ({
 }: SessionEditorProps) => {
 	const { user } = useAuth();
 
+	const location = useLocation();
+	const matchParams = location.state || {};
+
 	// Helper values that should not trigger rerenders
 	const revRef = useRef(0);
 	const shadowRef = useRef("");
@@ -29,10 +34,9 @@ export const SessionEditor = ({
 	const channelRef = useRef<Channel | null>(null);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
-	const WEB_SOCKET_URL = "ws://localhost:4000/ws";
 	const token = localStorage.getItem("authToken");
 
-	const sessionId = "";
+	const sessionId = matchParams.sessionId;
 
 	const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
 		editorRef.current = editor;
@@ -58,7 +62,7 @@ export const SessionEditor = ({
 
 	// Init and join the channel on mount
 	useEffect(() => {
-		const socket = new Socket(WEB_SOCKET_URL, {
+		const socket = new Socket(WEBSOCKET_URL, {
 			params: { token: token },
 		});
 		socket.connect();
@@ -132,7 +136,7 @@ export const SessionEditor = ({
 			channel.leave();
 			socket.disconnect();
 		};
-	}, [token, updateEditorContent, user]);
+	}, [token, updateEditorContent, user, sessionId]);
 
 	const handleCodeChange = (value: string | undefined) => {
 		if (localApply.current) {
