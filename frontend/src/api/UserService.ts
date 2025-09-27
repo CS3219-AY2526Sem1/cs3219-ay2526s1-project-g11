@@ -1,53 +1,54 @@
 import axios, { AxiosHeaders, AxiosResponse } from "axios";
 import { LoginResponse, VerifyTokenResponse } from "../types/types";
+import { USER_API_BASE_URL } from "../urls";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:3001",
-  headers: {
-    "Content-Type": "application/json",
-  },
+	baseURL: USER_API_BASE_URL,
+	headers: {
+		"Content-Type": "application/json",
+	},
 });
 
 const userServiceApiRequest = async <T>(
-  url: string,
-  method: "GET" | "POST" | "PUT" | "DELETE",
-  data?: any,
-  headers?: any
+	url: string,
+	method: "GET" | "POST" | "PUT" | "DELETE",
+	data?: any,
+	headers?: any,
 ): Promise<T> => {
-  const response: AxiosResponse<T> = await apiClient({
-    method,
-    url,
-    data,
-    headers,
-  });
+	const response: AxiosResponse<T> = await apiClient({
+		method,
+		url,
+		data,
+		headers,
+	});
 
-  return response.data;
+	return response.data;
 };
 
 export const verifyToken = async ({
-  token,
+	token,
 }: {
-  token: string;
+	token: string;
 }): Promise<VerifyTokenResponse> => {
-  return await userServiceApiRequest<VerifyTokenResponse>(
-    "/auth/verify-token",
-    "GET",
-    {},
-    {
-      Authorization: `Bearer ${token}`,
-    }
-  );
+	return await userServiceApiRequest<VerifyTokenResponse>(
+		"/auth/verify-token",
+		"GET",
+		{},
+		{
+			Authorization: `Bearer ${token}`,
+		},
+	);
 };
 
 export const userLogin = async ({
-  email,
-  password,
+	email,
+	password,
 }: {
-  email: string;
-  password: string;
+	email: string;
+	password: string;
 }) => {
-  return await userServiceApiRequest<LoginResponse>("/auth/login", "POST", {
-    email,
-    password,
-  });
+	return await userServiceApiRequest<LoginResponse>("/auth/login", "POST", {
+		email,
+		password,
+	});
 };
