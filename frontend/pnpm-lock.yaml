@@ -26,6 +26,9 @@ importers:
       lucide-react:
         specifier: ^0.544.0
         version: 0.544.0(react@19.1.1)
+      monaco-editor:
+        specifier: ^0.53.0
+        version: 0.53.0
       phoenix:
         specifier: ^1.8.1
         version: 1.8.1
