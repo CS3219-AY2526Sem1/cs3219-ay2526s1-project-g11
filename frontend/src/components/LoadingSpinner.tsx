@@ -1,10 +1,5 @@
-export const LoadingSpinner = ({
-	width,
-	height,
-}: {
-	width?: number;
-	height?: number;
-}) => {
+// Simple loading spinner component. Obtained from: https://flowbite.com/docs/components/spinner/
+export const LoadingSpinner = () => {
 	return (
 		<div className="text-center">
 			<output>
