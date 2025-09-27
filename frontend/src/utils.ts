@@ -6,18 +6,24 @@ export const twcn = (...args: ClassValue[]) => {
   return twMerge(cn(...args));
 };
 
-// compute a minimal {from,to,text} by LCP/LCSuffix against previous value
 export const computeCodeDiff = (oldText: string, newText: string) => {
-  if (oldText === newText) {
+  // Normalize line endings to handle newlines
+  const oldNormalized = oldText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const newNormalized = newText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  
+  if (oldNormalized === newNormalized) {
     return { from: 0, to: 0, text: "" };
   }
+  
   let start = 0;
-  while (start < oldText.length && start < newText.length && oldText[start] === newText[start]) {
+  while (start < oldNormalized.length && start < newNormalized.length && oldNormalized[start] === newNormalized[start]) {
     start++;
   }
-  let oldEnd = oldText.length - 1;
-  let newEnd = newText.length - 1;
-  while (oldEnd >= start && newEnd >= start && oldText[oldEnd] === newText[newEnd]) {
+  
+  let oldEnd = oldNormalized.length - 1;
+  let newEnd = newNormalized.length - 1;
+  
+  while (oldEnd >= start && newEnd >= start && oldNormalized[oldEnd] === newNormalized[newEnd]) {
     oldEnd--;
     newEnd--;
   }
@@ -25,6 +31,6 @@ export const computeCodeDiff = (oldText: string, newText: string) => {
   return {
     from: start,
     to: oldEnd + 1,
-    text: newText.slice(start, newEnd + 1)
+    text: newNormalized.slice(start, newEnd + 1)
   };
 };
