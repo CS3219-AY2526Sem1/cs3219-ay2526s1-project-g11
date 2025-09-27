@@ -1,10 +1,10 @@
+import { UsersIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { cancelMatch } from "../../api/MatchingService";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import { useCheckStatus, useRequestMatch } from "../../hooks/useRequestMatch";
 import { capitalizeFirstLetter } from "../../utils";
-import { UsersIcon, XIcon } from "lucide-react";
-import { cancelMatch } from "../../api/MatchingService";
 
 export const MatchingPage = () => {
 	const [hasJoinedQueue, setHasJoinedQueue] = useState(false);
