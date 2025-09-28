@@ -10,16 +10,17 @@ import Config
 config :collab_service,
   generators: [timestamp_type: :utc_datetime]
 
+# ensure the server starts & binds to Cloud Run's PORT (keep your existing lines here)
+if System.get_env("PHX_SERVER") do
+  config :collab_service, CollabServiceWeb.Endpoint, server: true
+end
+
+port = String.to_integer(System.get_env("PORT", "4000"))
+
 config :collab_service, CollabServiceWeb.Endpoint,
-  url: [host: "collab-service-1015946686380.europe-west1.run.app", port: 443, scheme: "https"],
-  check_origin: ["https://collab-service-1015946686380.europe-west1.run.app", "https://your-frontend.com"],
-  adapter: Bandit.PhoenixAdapter,
-  render_errors: [
-    formats: [html: CollabServiceWeb.ErrorHTML, json: CollabServiceWeb.ErrorJSON],
-    layout: false
-  ],
-  pubsub_server: CollabService.PubSub,
-  live_view: [signing_salt: "1o83+uil"]
+  http: [ip: {0, 0, 0, 0}, port: port],
+  url: [host: System.get_env("PUBLIC_URL", "localhost"), port: port, scheme: "https"],
+  check_origin: false   # <— allow file:// (Origin: null) during testing
 
 # Configures the mailer
 #
