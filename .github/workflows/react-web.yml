@@ -53,9 +53,6 @@ jobs:
       - name: Run Biome checks (linting, formatting, import sorting)
         run: pnpm biome check .
 
-      - name: Run ESLint
-        run: pnpm eslint . --ext .js,.jsx,.ts,.tsx
-
       - name: TypeScript type checking
         run: pnpm tsc --noEmit
 
