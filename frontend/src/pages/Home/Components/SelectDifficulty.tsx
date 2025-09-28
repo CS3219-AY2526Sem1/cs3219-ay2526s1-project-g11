@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { Badge } from "../../../components/Badge";
+import { Badge, BadgeColor } from "../../../components/Badge";
 
 type DifficultyItem = {
   id: string;
   name: string;
   description: string;
-  badgeColor: string;
+  badgeColor: BadgeColor;
 };
 
 const difficultyOptions: DifficultyItem[] = [
@@ -14,19 +14,19 @@ const difficultyOptions: DifficultyItem[] = [
     id: "easy",
     name: "Easy",
     description: "Great for beginners",
-    badgeColor: "bg-green-600",
+    badgeColor: BadgeColor.GREEN,
   },
   {
     id: "medium",
     name: "Medium",
     description: "Most common in interviews",
-    badgeColor: "bg-yellow-600",
+    badgeColor: BadgeColor.YELLOW,
   },
   {
     id: "hard",
     name: "Hard",
     description: "Advanced challenges",
-    badgeColor: "bg-red-600",
+    badgeColor: BadgeColor.RED,
   },
 ];
 
@@ -70,7 +70,7 @@ const DifficultyCard = ({
       onClick={() => onSelect(item)}
       type="button"
     >
-      <Badge text={item.name} className={item.badgeColor} />
+      <Badge text={item.name} color={item.badgeColor} />
       <h3 className="text-sm text-gray-500">{item.description}</h3>
       {isSelected && (
         <div

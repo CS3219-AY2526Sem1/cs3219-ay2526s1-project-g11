@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { Badge } from "../../../components/Badge";
+import { Badge, BadgeColor } from "../../../components/Badge";
 
 type TopicItem = {
   id: string;
@@ -80,7 +80,7 @@ const TopicCard = ({ item, isSelected, onSelect }: TopicCardProps) => {
       <div className="text-2xl">{item.icon && item.icon}</div>
       <div className="flex flex-col items-start gap-1 flex-1">
         <h3 className="font-bold">{item.name}</h3>
-        <Badge text="Popular" className="bg-blue-400" />
+        <Badge text="Popular" color={BadgeColor.BLUE} />
       </div>
       <div
         className={twMerge(
