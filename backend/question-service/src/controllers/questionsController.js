@@ -5,26 +5,41 @@ const Question = require("../models/questionModel");
 // @access Public
 const getQuestionsByDifficultyAndTag = async (req, res) => {
     try {
-        const { difficulty, tag, limit="5", page="1" } = req.query;
+        const { difficulty, tag, size = "5" } = req.query;
 
         // Validate input
         if (!difficulty || !tag) {
             return res.status(400).json({ error: "Query parameters 'difficulty' and 'tag' are required" });
         }
 
-        const pageNum = Math.max(1, parseInt(page, 10) || 1);
-        const pageSize = Math.min(100, Math.max(1, parseInt(limit, 10) || 5));
-        const skip = (pageNum - 1) * pageSize;
+        const sampleSize = Math.min(100, Math.max(1, parseInt(size, 10) || 5));
+
+        const difficultyRegex = new RegExp(`^${difficulty}$`, "i");
+        const tagRegex = new RegExp(`^${tag}$`, "i");
+
+        const matchStage = {
+            $and: [
+                { difficulty: { $regex: difficultyRegex } },
+                { "topicTags.slug": { $regex: tagRegex } }
+            ],
+        };
 
         // Query MongoDB
-        const questions = await Question.find({
-            difficulty: difficulty,
-            "topicTags.slug": tag
-        })
-        .select("title titleSlug difficulty topicTags question exampleTestcases")
-        .skip(skip)
-        .limit(pageSize)
-        .lean();
+        const questions = await Question.aggregate([
+            { $match: matchStage },
+            { $sample: { size: sampleSize } },
+            {
+                $project: {
+                    _id: 1,
+                    title: 1,
+                    titleSlug: 1,
+                    difficulty: 1,
+                    topicTags: 1,
+                    question: 1,
+                    exampleTestcases: 1
+                }
+            }
+        ]);
 
         res.status(200).json(questions);
     } catch (err) {
