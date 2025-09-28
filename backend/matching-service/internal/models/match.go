@@ -11,3 +11,9 @@ type MatchResponse struct {
 	PartnerID string `json:"partnerId,omitempty"`
 	Status    string `json:"status"`
 }
+
+type QueueUser struct {
+	UserID     string   `json:"userId"`
+	Topics     []string `json:"topics"`
+	Difficulty string   `json:"difficulty"`
+}

@@ -121,3 +121,35 @@ func (s *MatchingService) CheckUserStatus(ctx context.Context, userID string) (i
 	}
 	return 0, nil, nil
 }
+
+// GetQueueUsers returns all users currently in all queues
+func (s *MatchingService) GetQueueUsers(ctx context.Context) ([]models.QueueUser, error) {
+	queueUsers, err := s.repo.GetAllQueueUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []models.QueueUser
+	for queueKey, users := range queueUsers {
+		// Parse queue key to extract topics and difficulty
+		// Format: "queue:topic1,topic2:difficulty"
+		parts := strings.Split(queueKey, ":")
+		if len(parts) != 3 || parts[0] != "queue" {
+			continue // Skip malformed queue keys
+		}
+
+		topics := strings.Split(parts[1], ",")
+		difficulty := parts[2]
+
+		// Add each user in this queue
+		for _, userID := range users {
+			result = append(result, models.QueueUser{
+				UserID:     userID,
+				Topics:     topics,
+				Difficulty: difficulty,
+			})
+		}
+	}
+
+	return result, nil
+}
