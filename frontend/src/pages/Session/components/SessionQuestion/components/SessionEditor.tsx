@@ -23,7 +23,10 @@ export const SessionEditor = ({
       <div className="flex items-center">
         <UsersIcon className="h-4 w-4 text-gray-500 mr-1" />
         <div className="text-sm text-gray-500">2 users editing</div>
-        <button className="ml-auto cursor-pointer bg-blue-500 hover:bg-blue-600/90 active:bg-blue-700 flex items-center justify-center text-white text-sm px-3 py-2 rounded-lg gap-3">
+        <button
+          type="button"
+          className="ml-auto cursor-pointer bg-blue-500 hover:bg-blue-600/90 active:bg-blue-700 flex items-center justify-center text-white text-sm px-3 py-2 rounded-lg gap-3"
+        >
           <PlayIcon className="h-4 w-4" /> Run Solution
         </button>
       </div>

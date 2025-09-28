@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
 import { MessageCircleIcon, SendIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { twcn } from "../../../utils";
 
@@ -11,6 +11,7 @@ export const SessionChat = () => {
   const [inputValue, setInputValue] = useState("");
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: This should run whenever messages changes
   useEffect(() => {
     const scrollToBottom = () => {
       if (messagesContainerRef.current) {
@@ -36,6 +37,8 @@ export const SessionChat = () => {
         {messages.map((msg, index) => {
           return (
             <div
+              // TODO: Add unique key for each message
+              // biome-ignore lint/suspicious/noArrayIndexKey: This is a static list with no id yet. Will fix when chat socket is actually implemented.
               key={index}
               className={twcn(
                 "text-sm p-2 rounded-lg w-fit max-w-3/4 break-words",

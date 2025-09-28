@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "biome format",
+    "lint": "biome check",
+    "format": "biome format --write .",
     "preview": "vite preview"
   },
   "dependencies": {
