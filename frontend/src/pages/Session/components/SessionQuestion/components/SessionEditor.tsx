@@ -20,7 +20,7 @@ interface SessionEditorProps {
 export const SessionEditor = ({
   language = "javascript",
 }: SessionEditorProps) => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   const location = useLocation();
   const matchParams = location.state || {};
@@ -34,8 +34,6 @@ export const SessionEditor = ({
   const socketRef = useRef<Socket | null>(null);
   const channelRef = useRef<Channel | null>(null);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-
-  const token = localStorage.getItem("authToken");
 
   const sessionId = matchParams.sessionId;
 
