@@ -9,7 +9,7 @@
     "lint": "biome check",
     "format": "biome format --write .",
     "preview": "vite preview",
-    "setup-hooks": "./scripts/setup.sh"
+    "prepare": "cd .. && husky frontend/.husky"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
