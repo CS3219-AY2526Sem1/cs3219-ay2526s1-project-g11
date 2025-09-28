@@ -10,16 +10,25 @@ import Config
 config :collab_service,
   generators: [timestamp_type: :utc_datetime]
 
-# Configures the endpoint
+allowed =
+  [
+    "https://YOUR_RUN_HOST.a.run.app",
+    "https://your-frontend.example.com"
+  ]
+
 config :collab_service, CollabServiceWeb.Endpoint,
-  url: [host: "localhost"],
-  adapter: Bandit.PhoenixAdapter,
-  render_errors: [
-    formats: [html: CollabServiceWeb.ErrorHTML, json: CollabServiceWeb.ErrorJSON],
-    layout: false
-  ],
-  pubsub_server: CollabService.PubSub,
-  live_view: [signing_salt: "1o83+uil"]
+  check_origin: allowed
+
+# Configures the endpoint
+# config :collab_service, CollabServiceWeb.Endpoint,
+#   url: [host: "localhost"],
+#   adapter: Bandit.PhoenixAdapter,
+#   render_errors: [
+#     formats: [html: CollabServiceWeb.ErrorHTML, json: CollabServiceWeb.ErrorJSON],
+#     layout: false
+#   ],
+#   pubsub_server: CollabService.PubSub,
+#   live_view: [signing_salt: "1o83+uil"]
 
 # Configures the mailer
 #
