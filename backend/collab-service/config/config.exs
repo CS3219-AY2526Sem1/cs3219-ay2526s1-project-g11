@@ -12,7 +12,7 @@ config :collab_service,
 
 allowed =
   [
-    "https://YOUR_RUN_HOST.a.run.app",
+    "https://collab-service-1015946686380.europe-west1.run.app",
     "https://your-frontend.example.com"
   ]
 
@@ -20,15 +20,16 @@ config :collab_service, CollabServiceWeb.Endpoint,
   check_origin: allowed
 
 # Configures the endpoint
-# config :collab_service, CollabServiceWeb.Endpoint,
-#   url: [host: "localhost"],
-#   adapter: Bandit.PhoenixAdapter,
-#   render_errors: [
-#     formats: [html: CollabServiceWeb.ErrorHTML, json: CollabServiceWeb.ErrorJSON],
-#     layout: false
-#   ],
-#   pubsub_server: CollabService.PubSub,
-#   live_view: [signing_salt: "1o83+uil"]
+config :collab_service, CollabServiceWeb.Endpoint,
+  check_origin: allowed,
+  url: [host: "https://collab-service-1015946686380.europe-west1.run.app", port: 443, scheme: "https"],
+  adapter: Bandit.PhoenixAdapter,
+  render_errors: [
+    formats: [html: CollabServiceWeb.ErrorHTML, json: CollabServiceWeb.ErrorJSON],
+    layout: false
+  ],
+  pubsub_server: CollabService.PubSub,
+  live_view: [signing_salt: "1o83+uil"]
 
 # Configures the mailer
 #
