@@ -33,9 +33,6 @@ export const useCheckStatus = ({
   userId: string;
   enabled?: boolean;
 }) => {
-  if (!userId) {
-    throw new Error("User ID is required to check match status");
-  }
   const isPollingRef = useRef(false);
 
   const query = useQuery<GetMatchStatusResponse>({

@@ -49,18 +49,11 @@ export const requestMatch = async ({
 
 export const cancelMatch = async (userId: string): Promise<void> => {
   console.log("Cancelling match for user:", userId);
-  const response = await fetch(
-    `${MATCHING_API_BASE_URL}/match/cancel/by-user/${userId}`,
-    {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      keepalive: true,
-    },
+  const response = await matchingServiceApiRequest<void>(
+    `/match/cancel/by-user/${userId}`,
+    "DELETE",
   );
-
-  if (!response.ok) {
-    throw new Error(`Cancel failed: ${response.status}`);
-  }
+  return response;
 };
 
 export const getMatchStatus = async (
