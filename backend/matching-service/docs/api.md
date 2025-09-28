@@ -85,6 +85,24 @@ Base URL: `http://localhost:8080`
 { "status": "not_found", "matchId": null }
 ```
 
+### Get Queue
+- **GET** `/match/queue`
+- **200 Response**:
+```json
+[
+  {
+    "userId": "u123",
+    "topics": ["algorithms", "graphs"],
+    "difficulty": "easy"
+  },
+  {
+    "userId": "u456",
+    "topics": ["data-structures"],
+    "difficulty": "medium"
+  }
+]
+```
+
 ### Notes
 - Matches are stored temporarily and may expire after a short TTL.
 - No authentication is enforced in this demo service.
@@ -107,4 +125,7 @@ curl -s -X DELETE http://localhost:8080/match/cancel/<matchId>
 
 # Cancel a match by userId (works when waiting or matched)
 curl -s -X DELETE http://localhost:8080/match/cancel/by-user/<userId>
+
+# Get all users in the queue
+curl -s http://localhost:8080/match/queue
 ```

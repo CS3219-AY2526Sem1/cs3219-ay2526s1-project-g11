@@ -1,2 +1,5 @@
 APP_ENV=dev
 PORT=8080
+
+#REDIS
+REDIS_URL=localhost:6379
