@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { CustomPopover } from "./CustomPopover";
 import { CodeXmlIcon, LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
+import { Link } from "react-router";
 
 export const Header = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -12,7 +13,9 @@ export const Header = () => {
       <span className="w-10 h-10 rounded-xl bg-blue-500 text-white font-semibold text-xs flex items-center justify-center">
         <CodeXmlIcon className="h-5 w-5" />
       </span>
-      <h3 className="text-xl font-semibold text-gray-800">PeerPrep</h3>
+      <Link to={{ pathname: "/" }}>
+        <h3 className="text-xl font-semibold text-gray-800">PeerPrep</h3>
+      </Link>
       {user && (
         <CustomPopover
           trigger={
@@ -32,10 +35,12 @@ export const Header = () => {
               <p className="text-sm">{user?.username}</p>
               <p className="text-gray-400 text-xs">{user?.email}</p>
             </div>
-            <div className="cursor-pointer flex items-center py-2 px-3 hover:bg-gray-100">
-              <UserIcon className="w-4 h-4 mr-3" />
-              <p>Profile</p>
-            </div>
+            <Link to={{ pathname: "/profile" }}>
+              <div className="cursor-pointer flex items-center py-2 px-3 hover:bg-gray-100">
+                <UserIcon className="w-4 h-4 mr-3" />
+                Profile
+              </div>
+            </Link>
             <div className="py-2 px-3 border-b border-gray-200 hover:bg-gray-100">
               <div className="cursor-pointer flex items-center">
                 <SettingsIcon className="w-4 h-4 mr-3" />
