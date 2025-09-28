@@ -1,97 +1,97 @@
 import axios, { type AxiosResponse } from "axios";
 import type {
-	LoginResponse,
-	SignupResponse,
-	VerifyTokenResponse,
+  LoginResponse,
+  SignupResponse,
+  VerifyTokenResponse,
 } from "../types/types";
 
 const apiClient = axios.create({
-	baseURL: "http://localhost:3001",
-	headers: {
-		"Content-Type": "application/json",
-	},
+  baseURL: "http://localhost:3001",
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 const userServiceApiRequest = async <T>(
-	url: string,
-	method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
-	data?: unknown,
-	headers?: Record<string, string>,
+  url: string,
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
+  data?: unknown,
+  headers?: Record<string, string>,
 ): Promise<T> => {
-	const token = localStorage.getItem("authToken");
-	const response: AxiosResponse<T> = await apiClient({
-		method,
-		url,
-		data,
-		headers: {
-			Authorization: `Bearer ${token}`,
-			...headers,
-		},
-	});
+  const token = localStorage.getItem("authToken");
+  const response: AxiosResponse<T> = await apiClient({
+    method,
+    url,
+    data,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...headers,
+    },
+  });
 
-	return response.data;
+  return response.data;
 };
 
 export const verifyToken = async (): Promise<VerifyTokenResponse> => {
-	return await userServiceApiRequest<VerifyTokenResponse>(
-		"/auth/verify-token",
-		"GET",
-	);
+  return await userServiceApiRequest<VerifyTokenResponse>(
+    "/auth/verify-token",
+    "GET",
+  );
 };
 
 export const userLogin = async ({
-	email,
-	password,
+  email,
+  password,
 }: {
-	email: string;
-	password: string;
+  email: string;
+  password: string;
 }) => {
-	return await userServiceApiRequest<LoginResponse>("/auth/login", "POST", {
-		email,
-		password,
-	});
+  return await userServiceApiRequest<LoginResponse>("/auth/login", "POST", {
+    email,
+    password,
+  });
 };
 
 export const userSignup = async ({
-	name,
-	username,
-	email,
-	password,
+  name,
+  username,
+  email,
+  password,
 }: {
-	name: string;
-	username: string;
-	email: string;
-	password: string;
+  name: string;
+  username: string;
+  email: string;
+  password: string;
 }) => {
-	return await userServiceApiRequest<SignupResponse>("/users", "POST", {
-		name,
-		username,
-		email,
-		password,
-	});
+  return await userServiceApiRequest<SignupResponse>("/users", "POST", {
+    name,
+    username,
+    email,
+    password,
+  });
 };
 
 export const userUpdate = async ({
-	userId,
-	name,
-	username,
-	email,
-	password,
+  userId,
+  name,
+  username,
+  email,
+  password,
 }: {
-	userId: string;
-	name?: string;
-	username?: string;
-	email?: string;
-	password?: string;
+  userId: string;
+  name?: string;
+  username?: string;
+  email?: string;
+  password?: string;
 }) => {
-	return await userServiceApiRequest<SignupResponse>(
-		`/users/${userId}`,
-		"PATCH",
-		{
-			name,
-			username,
-			email,
-			password,
-		},
-	);
+  return await userServiceApiRequest<SignupResponse>(
+    `/users/${userId}`,
+    "PATCH",
+    {
+      name,
+      username,
+      email,
+      password,
+    },
+  );
 };
