@@ -3,7 +3,6 @@ defmodule CollabService.Collab.SessionServer do
 
   """
   use GenServer
-  alias Phoenix.PubSub
 
   # Public API -------------------------------------------------------------
 
@@ -49,7 +48,6 @@ defmodule CollabService.Collab.SessionServer do
 
   # GenServer ----------------------------------------------------------------
 
-  @impl true
   def start_link(session_id) do
     GenServer.start_link(__MODULE__, session_id, name: via(session_id))
   end
