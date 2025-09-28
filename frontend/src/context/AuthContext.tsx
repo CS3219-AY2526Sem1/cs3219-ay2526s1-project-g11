@@ -1,11 +1,11 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import { User } from "../types/types";
+import { createContext, useContext, useEffect, useState } from "react";
 import { verifyToken } from "../api/UserService";
+import type { LoginResponse, User } from "../types/types";
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
-  login: (token: string, user: User) => void;
+  login: (user: LoginResponse) => void;
   logout: () => void;
 }
 
@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (token) {
       try {
-        const verification = await verifyToken({ token });
+        const verification = await verifyToken();
         setIsAuthenticated(true);
         setUser(verification.data);
       } catch {
@@ -31,14 +31,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: This effect should only run once on mount
   useEffect(() => {
     checkToken();
   }, []);
 
-  const login = (token: string, user: User) => {
-    localStorage.setItem("authToken", token);
+  const login = (user: LoginResponse) => {
+    localStorage.setItem("authToken", user.data.accessToken);
     setIsAuthenticated(true);
-    setUser(user);
+    setUser(user.data);
   };
 
   const logout = () => {

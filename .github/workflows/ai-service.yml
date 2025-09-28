@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'backend/ai-service/**'
   pull_request:
     branches:
       - master
+    paths:
+      - 'backend/ai-service/**'
 
 jobs:
   build:
