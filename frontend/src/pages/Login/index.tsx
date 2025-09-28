@@ -75,7 +75,7 @@ const Login = () => {
               password
             />
             <p className="text-sm text-red-500">{error}</p>
-            <SubmitButton disabled={mutation.isPending}>Sign Up</SubmitButton>
+            <SubmitButton disabled={mutation.isPending}>Sign In</SubmitButton>
             <p className="text-center">
               Don't have an account?{" "}
               <Link

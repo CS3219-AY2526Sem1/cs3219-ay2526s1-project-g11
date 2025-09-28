@@ -5,8 +5,10 @@ import type {
   VerifyTokenResponse,
 } from "../types/types";
 
+const USER_API_BASE_URL = import.meta.env.VITE_USER_API_BASE_URL;
+
 const apiClient = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: USER_API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
