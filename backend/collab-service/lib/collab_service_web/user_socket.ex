@@ -3,7 +3,6 @@ defmodule CollabServiceWeb.UserSocket do
 
   channel "session:*", CollabServiceWeb.CollabChannel
 
-  @impl true
   def connect(_params, socket, _connect_info) do
     gid = "guest-" <> Base.url_encode64(:crypto.strong_rand_bytes(8))
     {:ok, assign(socket, :user_id, gid)}

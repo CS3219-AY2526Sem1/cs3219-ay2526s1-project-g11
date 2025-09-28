@@ -14,11 +14,6 @@ defmodule CollabServiceWeb.Router do
     plug :accepts, ["json"]
   end
 
-  # JWT Auth for API routes
-  pipeline :api_auth do
-    plug CollabServiceWeb.Plugs.JWTAuth
-  end
-
   scope "/", CollabServiceWeb do
     pipe_through :browser
 
