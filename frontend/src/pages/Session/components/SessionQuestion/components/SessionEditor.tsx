@@ -9,8 +9,9 @@ import type {
 	CodeUpdateResponse,
 	SessionJoinResponse,
 } from "../../../../../types/types";
-import { WEBSOCKET_URL } from "../../../../../urls";
 import { computeCodeDiff } from "../../../../../utils";
+
+const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
 
 interface SessionEditorProps {
 	language?: string;

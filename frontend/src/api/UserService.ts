@@ -1,6 +1,7 @@
 import axios, { AxiosHeaders, AxiosResponse } from "axios";
 import { LoginResponse, VerifyTokenResponse } from "../types/types";
-import { USER_API_BASE_URL } from "../urls";
+
+const USER_API_BASE_URL = import.meta.env.VITE_USER_API_BASE_URL;
 
 const apiClient = axios.create({
 	baseURL: USER_API_BASE_URL,

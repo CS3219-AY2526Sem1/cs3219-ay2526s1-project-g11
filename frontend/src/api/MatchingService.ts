@@ -4,7 +4,8 @@ import type {
 	RequestMatchPayload,
 	RequestMatchResponse,
 } from "../types/types";
-import { MATCHING_API_BASE_URL } from "../urls";
+
+const MATCHING_API_BASE_URL = import.meta.env.VITE_MATCHING_API_BASE_URL;
 
 const apiClient = axios.create({
 	baseURL: MATCHING_API_BASE_URL,
