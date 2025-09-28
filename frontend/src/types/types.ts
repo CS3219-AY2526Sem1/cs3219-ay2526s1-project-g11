@@ -1,5 +1,6 @@
 export interface User {
   id: string;
+  name: string;
   username: string;
   email: string;
   isAdmin: boolean;
@@ -14,4 +15,9 @@ export interface VerifyTokenResponse {
 export interface LoginResponse {
   message: string;
   data: User & { accessToken: string };
+}
+
+export interface SignupResponse {
+  message: string;
+  data: User;
 }

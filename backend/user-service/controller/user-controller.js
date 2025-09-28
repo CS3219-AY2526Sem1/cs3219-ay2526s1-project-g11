@@ -14,26 +14,37 @@ import {
 
 export async function createUser(req, res) {
   try {
-    const { username, email, password } = req.body;
-    if (username && email && password) {
+    const { name, username, email, password } = req.body;
+    if (name && username && email && password) {
       const existingUser = await _findUserByUsernameOrEmail(username, email);
       if (existingUser) {
-        return res.status(409).json({ message: "username or email already exists" });
+        return res
+          .status(409)
+          .json({ message: "username or email already exists" });
       }
 
       const salt = bcrypt.genSaltSync(10);
       const hashedPassword = bcrypt.hashSync(password, salt);
-      const createdUser = await _createUser(username, email, hashedPassword);
+      const createdUser = await _createUser(
+        name,
+        username,
+        email,
+        hashedPassword
+      );
       return res.status(201).json({
         message: `Created new user ${username} successfully`,
         data: formatUserResponse(createdUser),
       });
     } else {
-      return res.status(400).json({ message: "username and/or email and/or password are missing" });
+      return res
+        .status(400)
+        .json({ message: "username and/or email and/or password are missing" });
     }
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Unknown error when creating new user!" });
+    return res
+      .status(500)
+      .json({ message: "Unknown error when creating new user!" });
   }
 }
 
@@ -48,11 +59,15 @@ export async function getUser(req, res) {
     if (!user) {
       return res.status(404).json({ message: `User ${userId} not found` });
     } else {
-      return res.status(200).json({ message: `Found user`, data: formatUserResponse(user) });
+      return res
+        .status(200)
+        .json({ message: `Found user`, data: formatUserResponse(user) });
     }
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Unknown error when getting user!" });
+    return res
+      .status(500)
+      .json({ message: "Unknown error when getting user!" });
   }
 }
 
@@ -60,17 +75,21 @@ export async function getAllUsers(req, res) {
   try {
     const users = await _findAllUsers();
 
-    return res.status(200).json({ message: `Found users`, data: users.map(formatUserResponse) });
+    return res
+      .status(200)
+      .json({ message: `Found users`, data: users.map(formatUserResponse) });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Unknown error when getting all users!" });
+    return res
+      .status(500)
+      .json({ message: "Unknown error when getting all users!" });
   }
 }
 
 export async function updateUser(req, res) {
   try {
-    const { username, email, password } = req.body;
-    if (username || email || password) {
+    const { name, username, email, password } = req.body;
+    if (name || username || email || password) {
       const userId = req.params.id;
       if (!isValidObjectId(userId)) {
         return res.status(404).json({ message: `User ${userId} not found` });
@@ -95,17 +114,28 @@ export async function updateUser(req, res) {
         const salt = bcrypt.genSaltSync(10);
         hashedPassword = bcrypt.hashSync(password, salt);
       }
-      const updatedUser = await _updateUserById(userId, username, email, hashedPassword);
+      const updatedUser = await _updateUserById(
+        userId,
+        name,
+        username,
+        email,
+        hashedPassword
+      );
       return res.status(200).json({
         message: `Updated data for user ${userId}`,
         data: formatUserResponse(updatedUser),
       });
     } else {
-      return res.status(400).json({ message: "No field to update: username and email and password are all missing!" });
+      return res.status(400).json({
+        message:
+          "No field to update: username and email and password are all missing!",
+      });
     }
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Unknown error when updating user!" });
+    return res
+      .status(500)
+      .json({ message: "Unknown error when updating user!" });
   }
 }
 
@@ -113,7 +143,8 @@ export async function updateUserPrivilege(req, res) {
   try {
     const { isAdmin } = req.body;
 
-    if (isAdmin !== undefined) {  // isAdmin can have boolean value true or false
+    if (isAdmin !== undefined) {
+      // isAdmin can have boolean value true or false
       const userId = req.params.id;
       if (!isValidObjectId(userId)) {
         return res.status(404).json({ message: `User ${userId} not found` });
@@ -123,7 +154,10 @@ export async function updateUserPrivilege(req, res) {
         return res.status(404).json({ message: `User ${userId} not found` });
       }
 
-      const updatedUser = await _updateUserPrivilegeById(userId, isAdmin === true);
+      const updatedUser = await _updateUserPrivilegeById(
+        userId,
+        isAdmin === true
+      );
       return res.status(200).json({
         message: `Updated privilege for user ${userId}`,
         data: formatUserResponse(updatedUser),
@@ -133,7 +167,9 @@ export async function updateUserPrivilege(req, res) {
     }
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Unknown error when updating user privilege!" });
+    return res
+      .status(500)
+      .json({ message: "Unknown error when updating user privilege!" });
   }
 }
 
@@ -149,16 +185,21 @@ export async function deleteUser(req, res) {
     }
 
     await _deleteUserById(userId);
-    return res.status(200).json({ message: `Deleted user ${userId} successfully` });
+    return res
+      .status(200)
+      .json({ message: `Deleted user ${userId} successfully` });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Unknown error when deleting user!" });
+    return res
+      .status(500)
+      .json({ message: "Unknown error when deleting user!" });
   }
 }
 
 export function formatUserResponse(user) {
   return {
     id: user.id,
+    name: user.name,
     username: user.username,
     email: user.email,
     isAdmin: user.isAdmin,

@@ -11,8 +11,8 @@ export async function connectToDB() {
   await connect(mongoDBUri);
 }
 
-export async function createUser(username, email, password) {
-  return new UserModel({ username, email, password }).save();
+export async function createUser(name, username, email, password) {
+  return new UserModel({ name, username, email, password }).save();
 }
 
 export async function findUserByEmail(email) {
@@ -29,10 +29,7 @@ export async function findUserByUsername(username) {
 
 export async function findUserByUsernameOrEmail(username, email) {
   return UserModel.findOne({
-    $or: [
-      { username },
-      { email },
-    ],
+    $or: [{ username }, { email }],
   });
 }
 
@@ -40,17 +37,18 @@ export async function findAllUsers() {
   return UserModel.find();
 }
 
-export async function updateUserById(userId, username, email, password) {
+export async function updateUserById(userId, name, username, email, password) {
   return UserModel.findByIdAndUpdate(
     userId,
     {
       $set: {
+        name,
         username,
         email,
         password,
       },
     },
-    { new: true },  // return the updated user
+    { new: true } // return the updated user
   );
 }
 
@@ -62,7 +60,7 @@ export async function updateUserPrivilegeById(userId, isAdmin) {
         isAdmin,
       },
     },
-    { new: true },  // return the updated user
+    { new: true } // return the updated user
   );
 }
 
