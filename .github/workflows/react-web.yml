@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
-          cache-dependency-path: frontend/pnpm-lock.json
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Get pnpm store directory
         shell: bash
