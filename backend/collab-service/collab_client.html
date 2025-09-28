@@ -6,13 +6,12 @@
 <script type="module">
   import {Socket} from "https://cdn.skypack.dev/phoenix@1.7.11";
 
-  const token = "";
   const sessionId = "abc";
 
   const log = (m) => document.querySelector("#log").textContent += m + "\n";
   const ed  = document.querySelector("#editor");
 
-  const socket = new Socket("ws://localhost:4000/ws", { params: { token } });
+  const socket = new Socket("ws://localhost:4000/ws");
   socket.connect();
 
   const chan = socket.channel(`session:${sessionId}`);

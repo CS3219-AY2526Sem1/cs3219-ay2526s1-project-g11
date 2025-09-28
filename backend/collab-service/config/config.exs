@@ -30,11 +30,6 @@ config :collab_service, CollabServiceWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :collab_service, CollabService.Mailer, adapter: Swoosh.Adapters.Local
 
-config :joken, default_signer: [
-    algorithm: "HS256",
-    key: System.get_env("JWT_SECRET", "dev-secret")
-  ]
-
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
