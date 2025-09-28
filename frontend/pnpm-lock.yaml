@@ -87,6 +87,9 @@ importers:
       globals:
         specifier: ^16.4.0
         version: 16.4.0
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
       vite:
         specifier: ^7.1.6
         version: 7.1.6(jiti@2.5.1)(lightningcss@1.30.1)

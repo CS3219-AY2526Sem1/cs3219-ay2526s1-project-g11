@@ -35,7 +35,8 @@ export const Profile = () => {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: updateForm) => userUpdate({ userId: user?.id, ...data }),
+    mutationFn: (data: updateForm) =>
+      userUpdate({ userId: user?.id || "", ...data }),
     onSuccess: () => alert("Your profile has been updated!"),
     onError: (error) => {
       if (error instanceof AxiosError) {
