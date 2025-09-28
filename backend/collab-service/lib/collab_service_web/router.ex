@@ -33,6 +33,11 @@ defmodule CollabServiceWeb.Router do
     get "/sessions/:id", SessionController, :show
   end
 
+  scope "/health", CollabServiceWeb do
+    pipe_through :api
+    get "/", HealthController, :index
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", CollabServiceWeb do
   #   pipe_through :api
