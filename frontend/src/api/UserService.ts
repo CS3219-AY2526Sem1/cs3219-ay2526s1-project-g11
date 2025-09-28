@@ -1,5 +1,5 @@
-import axios, { AxiosHeaders, AxiosResponse } from "axios";
-import {
+import axios, { type AxiosResponse } from "axios";
+import type {
   LoginResponse,
   SignupResponse,
   VerifyTokenResponse,
@@ -15,8 +15,8 @@ const apiClient = axios.create({
 const userServiceApiRequest = async <T>(
   url: string,
   method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
-  data?: any,
-  headers?: any,
+  data?: unknown,
+  headers?: Record<string, string>,
 ): Promise<T> => {
   const token = localStorage.getItem("authToken");
   const response: AxiosResponse<T> = await apiClient({

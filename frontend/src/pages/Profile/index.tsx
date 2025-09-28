@@ -1,14 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FieldInput } from "../../components/FieldInput";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { Mail, User, Contact } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
 import { useMutation } from "@tanstack/react-query";
-import { userUpdate } from "../../api/UserService";
 import { AxiosError } from "axios";
+import { Contact, Mail, User } from "lucide-react";
 import { useState } from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
+import { userUpdate } from "../../api/UserService";
+import { FieldInput } from "../../components/FieldInput";
 import { SubmitButton } from "../../components/SubmitButton";
+import { useAuth } from "../../context/AuthContext";
 
 const updateFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -35,7 +35,8 @@ export const Profile = () => {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: updateForm) => userUpdate({ userId: user!.id, ...data }),
+    mutationFn: (data: updateForm) =>
+      userUpdate({ userId: user?.id || "", ...data }),
     onSuccess: () => alert("Your profile has been updated!"),
     onError: (error) => {
       if (error instanceof AxiosError) {

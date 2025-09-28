@@ -1,16 +1,16 @@
-import { useState } from "react";
-import { Mail, Lock, User, Contact } from "lucide-react";
-import { Link, useNavigate } from "react-router";
-import { userLogin, userSignup } from "../../api/UserService";
-import { useMutation } from "@tanstack/react-query";
-import { LoginResponse } from "../../types/types";
-import { AxiosError } from "axios";
-import { FieldInput } from "../../components/FieldInput";
-import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { Contact, Lock, Mail, User } from "lucide-react";
+import { useState } from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router";
 import z from "zod";
-import { useAuth } from "../../context/AuthContext";
+import { userLogin, userSignup } from "../../api/UserService";
+import { FieldInput } from "../../components/FieldInput";
 import { SubmitButton } from "../../components/SubmitButton";
+import { useAuth } from "../../context/AuthContext";
+import type { LoginResponse } from "../../types/types";
 
 const signupFormSchema = z
   .object({

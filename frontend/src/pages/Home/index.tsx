@@ -6,7 +6,9 @@ const Home = () => {
   return (
     <div>
       Logged in! Welcome {user?.username}{" "}
-      <button onClick={() => logout()}>Logout</button>
+      <button type="button" onClick={() => logout()}>
+        Logout
+      </button>
     </div>
   );
 };

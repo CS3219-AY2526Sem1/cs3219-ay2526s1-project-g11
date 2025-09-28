@@ -1,4 +1,4 @@
-import React, { ButtonHTMLAttributes, Ref } from "react";
+import React, { type ButtonHTMLAttributes } from "react";
 
 interface SubmitButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "ref"> {
@@ -8,7 +8,7 @@ interface SubmitButtonProps
 export const SubmitButton = React.forwardRef<
   HTMLButtonElement,
   SubmitButtonProps
->(({ children, ...rest }, ref: Ref<HTMLButtonElement>) => {
+>(({ children, ...rest }) => {
   return (
     <button
       type="submit"

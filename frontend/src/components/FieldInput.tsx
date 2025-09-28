@@ -1,5 +1,10 @@
 import { Eye, EyeOff } from "lucide-react";
-import React, { InputHTMLAttributes, JSX, Ref, useState } from "react";
+import React, {
+  type InputHTMLAttributes,
+  type JSX,
+  type Ref,
+  useState,
+} from "react";
 
 interface FieldInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "ref"> {

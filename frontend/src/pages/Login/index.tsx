@@ -1,13 +1,13 @@
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { Lock, Mail } from "lucide-react";
 import { useState } from "react";
-import { Mail, Lock } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
 import { Link, useNavigate } from "react-router";
 import { userLogin } from "../../api/UserService";
-import { useMutation } from "@tanstack/react-query";
-import { LoginResponse } from "../../types/types";
-import { AxiosError } from "axios";
 import { FieldInput } from "../../components/FieldInput";
 import { SubmitButton } from "../../components/SubmitButton";
+import { useAuth } from "../../context/AuthContext";
+import type { LoginResponse } from "../../types/types";
 
 // Tool: Claude (model: Sonnet 4), date: 2025‑09‑21
 // Scope: Generated a very basic login screen with no logic

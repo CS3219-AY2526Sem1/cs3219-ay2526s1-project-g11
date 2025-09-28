@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import { LoginResponse, User } from "../types/types";
+import { createContext, useContext, useEffect, useState } from "react";
 import { verifyToken } from "../api/UserService";
+import type { LoginResponse, User } from "../types/types";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: This effect should only run once on mount
   useEffect(() => {
     checkToken();
   }, []);
