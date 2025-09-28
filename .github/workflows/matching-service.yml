@@ -75,5 +75,4 @@ jobs:
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/matching-service:${{ github.sha }} \
             --region asia-east1 \
             --platform managed \
-            --allow-unauthenticated \
             --port=8080
