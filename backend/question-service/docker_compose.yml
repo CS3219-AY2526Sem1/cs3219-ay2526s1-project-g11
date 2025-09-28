@@ -1,0 +1,24 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: question-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  question-service:
+    build:
+      context: .
+    image: question-service:latest
+    container_name: question-service
+    environment:
+      - MONGODB_URI=mongodb+srv://e0958551_db_user:O74Yyhfesa5WKsmB@questiondb.lchrn7r.mongodb.net/QuestionDB?retryWrites=true&w=majority&appName=QuestionDB
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+
+volumes:
+  mongo_data:
