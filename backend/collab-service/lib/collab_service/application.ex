@@ -20,7 +20,8 @@ defmodule CollabService.Application do
       {Registry, keys: :unique, name: CollabService.SessionRegistry},
 
       # Start and stop sessions on demand
-      {DynamicSupervisor, strategy: :one_for_one, name: CollabService.SessionSupervisor}
+      {DynamicSupervisor, strategy: :one_for_one, name: CollabService.SessionSupervisor},
+      {DynamicSupervisor, strategy: :one_for_one, name: CollabService.ChatSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
