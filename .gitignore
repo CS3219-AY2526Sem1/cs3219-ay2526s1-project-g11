@@ -226,3 +226,7 @@ temp/
 
 # Development files
 .dev/
+
+# database backups
+backend/question-service/db-backups/*.sql
+backend/question-service/db-backups/*.dump
