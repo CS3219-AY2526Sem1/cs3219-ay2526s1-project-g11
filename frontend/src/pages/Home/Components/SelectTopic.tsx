@@ -2,12 +2,13 @@ import { type ReactNode, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Badge, BadgeColor } from "../../../components/Badge";
 
-type TopicItem = {
+export type TopicItem = {
   id: string;
   name: string;
-  icon?: ReactNode;
+  icon: string;
 };
 
+// TODO: this shouldn't be hard coded
 const sampleDifficultyData: TopicItem[] = [
   {
     id: "arrays_and_strings",
@@ -42,19 +43,19 @@ const sampleDifficultyData: TopicItem[] = [
 ];
 
 interface SelectTopicProps {
-  value?: "";
+  value: TopicItem | undefined;
+  onChange: (item: TopicItem) => void;
 }
 
-export const SelectTopic = ({ value }: SelectTopicProps) => {
-  const [selected, setSelected] = useState<TopicItem>();
+export const SelectTopic = ({ value, onChange }: SelectTopicProps) => {
   return (
     <div className="grid gap-3 lg:grid-cols-2 sm:grid-cols-1">
       {sampleDifficultyData.map((item) => (
         <TopicCard
           key={item.name}
           item={item}
-          onSelect={setSelected}
-          isSelected={selected?.id === item.id}
+          onSelect={onChange}
+          isSelected={value?.id === item.id}
         />
       ))}
     </div>
@@ -71,8 +72,8 @@ const TopicCard = ({ item, isSelected, onSelect }: TopicCardProps) => {
   return (
     <button
       className={twMerge(
-        "flex flex-row items-center gap-4 rounded-xl border-2 py-4 px-6 cursor-pointer border-gray-200",
-        isSelected && "border-blue-500"
+        "flex flex-row items-center gap-4 rounded-xl border-2 py-4 px-6 cursor-pointer border-gray-200 transition-colors duration-300 hover:border-blue-300 hover:shadow-lg",
+        isSelected && "border-blue-500 hover:border-blue-500 shadow-lg"
       )}
       onClick={() => onSelect(item)}
       type="button"

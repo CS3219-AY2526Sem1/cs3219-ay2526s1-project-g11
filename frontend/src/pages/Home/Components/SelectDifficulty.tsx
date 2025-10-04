@@ -2,7 +2,7 @@ import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Badge, BadgeColor } from "../../../components/Badge";
 
-type DifficultyItem = {
+export type DifficultyItem = {
   id: string;
   name: string;
   description: string;
@@ -31,19 +31,19 @@ const difficultyOptions: DifficultyItem[] = [
 ];
 
 interface SelectDifficultyProps {
-  value?: "";
+  value: DifficultyItem | undefined;
+  onChange: (item: DifficultyItem) => void;
 }
 
-export const SelectDifficulty = ({ value }: SelectDifficultyProps) => {
-  const [selected, setSelected] = useState<DifficultyItem>();
+export const SelectDifficulty = ({ value, onChange }: SelectDifficultyProps) => {
   return (
     <div className="grid gap-3 lg:grid-cols-3 sm:grid-cols-1">
       {difficultyOptions.map((item) => (
         <DifficultyCard
           key={item.name}
           item={item}
-          onSelect={setSelected}
-          isSelected={selected?.id === item.id}
+          onSelect={onChange}
+          isSelected={value?.id === item.id}
         />
       ))}
     </div>
@@ -64,8 +64,8 @@ const DifficultyCard = ({
   return (
     <button
       className={twMerge(
-        "flex flex-col items-center text-center gap-1 rounded-xl border-2 py-6 px-6 cursor-pointer border-gray-200",
-        isSelected && "border-blue-500"
+        "flex flex-col items-center text-center gap-1 rounded-xl border-2 py-6 px-6 cursor-pointer border-gray-200 transition-colors duration-300 hover:border-blue-300 hover:shadow-lg",
+        isSelected && "border-blue-500 hover:border-blue-500 shadow-lg"
       )}
       onClick={() => onSelect(item)}
       type="button"
