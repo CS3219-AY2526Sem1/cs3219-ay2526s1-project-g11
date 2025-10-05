@@ -1,4 +1,3 @@
-import { type ReactNode, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Badge, BadgeColor } from "../../../components/Badge";
 
@@ -73,7 +72,7 @@ const TopicCard = ({ item, isSelected, onSelect }: TopicCardProps) => {
     <button
       className={twMerge(
         "flex flex-row items-center gap-4 rounded-xl border-2 py-4 px-6 cursor-pointer border-gray-200 transition-colors duration-300 hover:border-blue-300 hover:shadow-lg",
-        isSelected && "border-blue-500 hover:border-blue-500 shadow-lg"
+        isSelected && "border-blue-500 hover:border-blue-500 shadow-lg",
       )}
       onClick={() => onSelect(item)}
       type="button"
@@ -86,7 +85,7 @@ const TopicCard = ({ item, isSelected, onSelect }: TopicCardProps) => {
       <div
         className={twMerge(
           "w-6 h-6 rounded-full flex items-center justify-center",
-          isSelected && "bg-blue-500"
+          isSelected && "bg-blue-500",
         )}
       >
         <div className="w-2 h-2 bg-white rounded-full" />

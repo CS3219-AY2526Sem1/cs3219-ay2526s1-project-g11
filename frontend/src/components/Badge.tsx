@@ -18,7 +18,7 @@ export const Badge = ({ text, color }: BadgeProps) => {
     <div
       className={twMerge(
         "text-xs text-white font-bold rounded-4xl bg-amber-600 px-2 py-0.5",
-        color
+        color,
       )}
     >
       {text}

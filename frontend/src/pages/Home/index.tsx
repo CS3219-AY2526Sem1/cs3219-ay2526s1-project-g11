@@ -1,35 +1,35 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Bolt, BookOpen, Clock, Trophy, Users } from "lucide-react";
+import { Controller, type SubmitHandler, useForm } from "react-hook-form";
+import z from "zod";
 import { SubmitButton } from "../../components/SubmitButton";
 import { useAuth } from "../../context/AuthContext";
 import { Card } from "./Components/Card";
 import { MainCard } from "./Components/MainCard";
 import {
-  DifficultyItem,
+  type DifficultyItem,
   SelectDifficulty,
 } from "./Components/SelectDifficulty";
-import { SelectTopic, TopicItem } from "./Components/SelectTopic";
+import { SelectTopic, type TopicItem } from "./Components/SelectTopic";
 import { StatsCard } from "./Components/StatsCard";
-import z from "zod";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
-const preferenceForm = z.object({
+const preferenceFormSchema = z.object({
   difficulty: z.custom<DifficultyItem>(),
   topic: z.custom<TopicItem>(),
 });
 
-type preferenceFormType = z.infer<typeof preferenceForm>;
+type preferenceForm = z.infer<typeof preferenceFormSchema>;
 
 const Home = () => {
   const { user } = useAuth();
   const { handleSubmit, control, watch } = useForm({
-    resolver: zodResolver(preferenceForm),
+    resolver: zodResolver(preferenceFormSchema),
   });
 
   const difficulty = watch("difficulty");
   const topic = watch("topic");
 
-  const onSubmit: SubmitHandler<preferenceFormType> = (data) => {
+  const onSubmit: SubmitHandler<preferenceForm> = (_data) => {
     // TODO: navigate to matching page with these parameters
   };
 
@@ -82,7 +82,6 @@ const Home = () => {
                 description="Pick the challenge level that matches your skill"
                 icon={<Bolt className="text-blue-400" />}
               >
-                {" "}
                 <Controller
                   control={control}
                   name="difficulty"
