@@ -1,4 +1,4 @@
-defmodule CollabService.Collab.ChatServer do
+defmodule CollabService.Chat.ChatServer do
   use GenServer
   require Logger
 

@@ -11,7 +11,7 @@
   const log = (m) => document.querySelector("#log").textContent += m + "\n";
   const ed  = document.querySelector("#editor");
 
-  const socket = new Socket("wss://collab-service-1015946686380.europe-west1.run.app/ws");
+  const socket = new Socket("ws://localhost:4000/ws");
   socket.connect();
 
   const chan = socket.channel(`session:${sessionId}`);
