@@ -8,29 +8,32 @@ defmodule CollabServiceWeb.CollabChannel do
     {:ok, _pid} = SessionServer.start_if_needed(session_id)
     {:ok, _pid} = ChatServer.start_if_needed(session_id)
 
-    :ok = SessionServer.join(session_id, user_id)
+    case SessionServer.join(session_id, user_id) do
+      {:ok, _} ->
+        session_data = case SessionServer.get_current_state(session_id) do
+          {:ok, %{rev: rev, text: text}} -> %{rev: rev, text: text}
+          {:error, _} -> %{rev: 0, text: ""}
+        end
 
-    session_data = case SessionServer.get_current_state(session_id) do
-      {:ok, %{rev: rev, text: text}} -> %{rev: rev, text: text}
-      {:error, _} -> %{rev: 0, text: ""}
+        # Get recent chat messages
+        chat_messages = case ChatServer.get_recent_messages(session_id, 50) do
+          {:ok, messages} -> messages
+          {:error, _} -> []
+        end
+
+        socket = socket
+        |> assign(:session_id, session_id)
+        |> assign(:user_id, user_id)
+
+        response = Map.merge(session_data, %{
+          user_id: user_id,
+          chat_messages: chat_messages
+        })
+
+        {:ok, response, socket}
+      {:error, :session_full} ->
+        {:error, %{reason: "Session is full. Maximum 2 participants allowed."}}
     end
-
-    # Get recent chat messages
-    chat_messages = case ChatServer.get_recent_messages(session_id, 50) do
-      {:ok, messages} -> messages
-      {:error, _} -> []
-    end
-
-    socket = socket
-    |> assign(:session_id, session_id)
-    |> assign(:user_id, user_id)
-
-    response = Map.merge(session_data, %{
-      user_id: user_id,
-      chat_messages: chat_messages
-    })
-
-    {:ok, response, socket}
   end
 
   def handle_in("code:delta", %{"from" => f, "to" => t, "text" => txt, "rev" => rev}, socket) do

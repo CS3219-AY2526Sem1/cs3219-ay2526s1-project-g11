@@ -20,12 +20,12 @@ defmodule CollabService.Collab.ChatServer do
   end
 
   def get_recent_messages(session_id, limit \\ 50) do
-    GenServer.call(via(session_id), {:get_recent_messages, user_id, text})
+    GenServer.call(via(session_id), {:get_recent_messages, limit})
   end
 
-  def get_message_call(session_id, user_id, text) do
-    GenServer.call(via(session_id), {:get_message_call, user_id, text})
-  end
+  # def get_message_call(session_id, user_id, text) do
+  #   GenServer.call(via(session_id), {:get_message_call, user_id})
+  # end
 
   # Implementation
 

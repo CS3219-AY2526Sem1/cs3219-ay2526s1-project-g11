@@ -18,7 +18,7 @@ defmodule CollabService.Collab.SessionServer do
   end
 
   def join(session_id, user_id) do
-    GenServer.cast(via(session_id), {:join, user_id})
+    GenServer.call(via(session_id), {:join, user_id})
   end
 
   @doc """
@@ -47,6 +47,7 @@ defmodule CollabService.Collab.SessionServer do
   end
 
   # GenServer ----------------------------------------------------------------
+  @max_participants 2
 
   def start_link(session_id) do
     GenServer.start_link(__MODULE__, session_id, name: via(session_id))
@@ -64,9 +65,17 @@ defmodule CollabService.Collab.SessionServer do
     {:ok, state}
   end
 
-  @impl true
-  def handle_cast({:join, user_id}, state) do
-    {:noreply, %{state | participants: MapSet.put(state.participants, user_id)}}
+  def handle_call({:join, user_id}, state) do
+    cond do
+      MapSet.member?(state.participants, user_id) ->
+        {:reply, {:ok, :already_joined}, state}
+      MapSet.size(state.participants) >= @max_participants ->
+        {:reply, {:error, :session_full}, state}
+      true ->
+        new_participants = MapSet.put(state.participants, user_id)
+        broadcast_user_joined(state.id, user_id, MapSet.size(new_participants))
+        {:noreply, %{state | participants: new_participants}}
+    end
   end
 
   @impl true
@@ -139,4 +148,13 @@ defmodule CollabService.Collab.SessionServer do
       "text" => text
     })
   end
+
+  defp broadcast_user_joined(session_id, user_id, total_participants) do
+    CollabServiceWeb.Endpoint.broadcast!(
+      "session:" <> session_id,
+      "session:user_joined",
+      %{"user_id" => user_id, "total_participants" => total_participants}
+    )
+  end
+
 end
