@@ -1,6 +1,7 @@
 import axios, { type AxiosResponse } from "axios";
 import type {
   LoginResponse,
+  ResetLinkResponse,
   SignupResponse,
   VerifyTokenResponse,
 } from "../types/types";
@@ -32,10 +33,20 @@ const userServiceApiRequest = async <T>(
   return response.data;
 };
 
-export const verifyToken = async (): Promise<VerifyTokenResponse> => {
+export const verifyToken = async (
+  token?: string,
+): Promise<VerifyTokenResponse> => {
   return await userServiceApiRequest<VerifyTokenResponse>(
     "/auth/verify-token",
     "GET",
+    {},
+    ...[
+      token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {},
+    ],
   );
 };
 
@@ -77,12 +88,14 @@ export const userUpdate = async ({
   username,
   email,
   password,
+  token,
 }: {
   userId: string;
   name?: string;
   username?: string;
   email?: string;
   password?: string;
+  token?: string;
 }) => {
   return await userServiceApiRequest<SignupResponse>(
     `/users/${userId}`,
@@ -92,6 +105,19 @@ export const userUpdate = async ({
       username,
       email,
       password,
+    },
+    {
+      Authorization: `Bearer ${token}`,
+    },
+  );
+};
+
+export const userSendResetLink = async ({ email }: { email: string }) => {
+  return await userServiceApiRequest<ResetLinkResponse>(
+    `/auth/forgot-password`,
+    "POST",
+    {
+      email,
     },
   );
 };

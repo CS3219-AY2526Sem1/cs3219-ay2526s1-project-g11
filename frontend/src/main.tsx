@@ -6,6 +6,7 @@ import { Header } from "./components/Header";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
+import ForgotPassword from "./pages/ForgotPassword";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import { Profile } from "./pages/Profile";
@@ -33,6 +34,11 @@ if (rootElement) {
               />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route
+                path="/forgot-password/:token"
+                element={<ForgotPassword />}
+              />
               <Route
                 path="/profile"
                 element={

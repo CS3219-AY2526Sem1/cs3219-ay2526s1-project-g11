@@ -21,3 +21,7 @@ export interface SignupResponse {
   message: string;
   data: User;
 }
+
+export interface ResetLinkResponse {
+  message: string;
+}
