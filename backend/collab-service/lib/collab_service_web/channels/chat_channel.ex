@@ -3,17 +3,40 @@ defmodule CollabServiceWeb.ChatChannel do
   require Logger
   alias CollabService.Chat.ChatServer
 
-  def join("session:" <> session_id, params, socket) do
+  def join("chat:" <> session_id, params, socket) do  # Note: "chat:" prefix
     user_id = socket.assigns.user_id || "guest-#{:crypto.strong_rand_bytes(4) |> Base.encode64()}"
 
-    Logger.info("Channel join attempt - session: #{session_id}, user: #{user_id}, params: #{inspect(params)}")
-
+    Logger.info("ChatChannel join attempt - session: #{session_id}, user: #{user_id}, params: #{inspect(params)}")
 
     case ChatServer.start_if_needed(session_id) do
       {:ok, _pid} ->
         Logger.debug("ChatServer ready for session #{session_id}")
+
+        # Get chat history
+        chat_messages = case ChatServer.get_recent_messages(session_id, 50) do
+          {:ok, messages} ->
+            Logger.debug("Retrieved #{length(messages)} chat messages")
+            messages
+          {:error, reason} ->
+            Logger.warning("Failed to get chat messages: #{inspect(reason)}")
+            []
+        end
+
+        socket = socket
+        |> assign(:session_id, session_id)
+        |> assign(:user_id, user_id)
+
+        response = %{
+          user_id: user_id,
+          chat_messages: chat_messages
+        }
+
+        Logger.info("ChatChannel join successful - session: #{session_id}, user: #{user_id}")
+        {:ok, response, socket}
+
       {:error, reason} ->
         Logger.error("Failed to start ChatServer for session #{session_id}: #{inspect(reason)}")
+        {:error, %{reason: "Failed to start chat server: #{inspect(reason)}"}}
     end
   end
 
