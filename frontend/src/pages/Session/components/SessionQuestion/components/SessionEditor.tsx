@@ -42,7 +42,6 @@ export const SessionEditor = ({
   };
 
   const updateEditorContent = useCallback((newContent: string) => {
-    console.log("updating editor content", newContent);
     if (editorRef.current) {
       const editor = editorRef.current;
       // Save current cursor position
@@ -84,11 +83,10 @@ export const SessionEditor = ({
         }
       })
       .receive("error", (resp: { resp: { reason: string } }) => {
-        console.log("Unable to join", resp);
+        console.error("Unable to join", resp);
       });
 
     channel.on("code:update", (response: CodeUpdateResponse) => {
-      console.log("Update response:", response);
       const { rev: newRev, delta, by } = response;
       revRef.current = newRev;
 
@@ -104,7 +102,6 @@ export const SessionEditor = ({
         const newCode = left + delta.text + right;
 
         // Update content while preserving cursor
-        console.log("new code", newCode);
         updateEditorContent(newCode);
       }
     });
@@ -119,7 +116,7 @@ export const SessionEditor = ({
     );
 
     channel.on("code:error", ({ reason }: { reason: string }) =>
-      console.log(`error: ${reason}`),
+      console.error(`error: ${reason}`),
     );
     channel.on("code:stale", () => {
       console.log("Stale revision, requesting snapshot");
@@ -127,7 +124,6 @@ export const SessionEditor = ({
     });
 
     return () => {
-      console.log("Cleaning up socket");
       channel.off("code:update");
       channel.off("code:snapshot");
       channel.off("code:error");

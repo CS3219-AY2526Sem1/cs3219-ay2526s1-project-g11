@@ -42,8 +42,7 @@ export const MatchingPage = () => {
         difficulty: matchParams.difficulty,
       },
       {
-        onSuccess: (data) => {
-          console.log(data);
+        onSuccess: () => {
           setHasJoinedQueue(true);
         },
         onError: (e) => {
@@ -61,6 +60,7 @@ export const MatchingPage = () => {
       joinQueue();
     }
 
+    // Handle user close or change tabs
     const handleVisibilityChange = () => {
       if (document.hidden) {
         exitQueue();
@@ -69,10 +69,12 @@ export const MatchingPage = () => {
       }
     };
 
+    // Before user refreshes, show default alert
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
     };
 
+    // If user unloads the page, exit the queue
     const handleUnload = () => {
       exitQueue();
     };
@@ -88,30 +90,20 @@ export const MatchingPage = () => {
     };
   }, []);
 
-  // Separate effect for navigation blocking that has access to current state
   useEffect(() => {
     const handlePopState = () => {
-      console.log(
-        "popstate fired, hasJoinedQueue:",
-        hasJoinedQueue,
-        "isMatchFound:",
-        isMatchFound,
-      );
-
       if (hasJoinedQueue && !isMatchFound) {
         const confirmPrompt = window.confirm(
           "Are you sure you want to leave? You will exit the queue.",
         );
 
         if (!confirmPrompt) {
-          // User wants to stay
           window.history.pushState(null, "", window.location.pathname);
           return;
         } else {
           // User confirmed - clean exit
           exitQueue();
           setHasJoinedQueue(false);
-          // Navigate back to home page
           navigate("/", { replace: true });
         }
       }
@@ -130,7 +122,7 @@ export const MatchingPage = () => {
 
   useEffect(() => {
     if (data && data.status === 2) {
-      // Match found
+      // Match found, inform user and redirect to session page after 2 seconds
       setIsMatchFound(true);
       exitQueue();
 
