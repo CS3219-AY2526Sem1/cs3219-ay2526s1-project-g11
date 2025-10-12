@@ -6,13 +6,14 @@ export const TestPage = () => {
   const { user } = useAuth();
 
   const handleNavigation = () => {
-    navigate("/matching", {
-      state: {
-        userId: user?.id || "",
-        topics: ["arrays", "strings"],
-        difficulty: "medium",
-      },
-    });
+    const mockData = {
+      userId: user?.id || "",
+      difficulty: "medium",
+      topics: ["arrays", "strings"],
+    };
+    const matchingParams = { ...mockData };
+    sessionStorage.setItem("matchingParams", JSON.stringify(matchingParams));
+    navigate("/matching", { state: matchingParams });
   };
 
   return (

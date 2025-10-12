@@ -10,7 +10,15 @@ export const MatchingPage = () => {
   const [hasJoinedQueue, setHasJoinedQueue] = useState(false);
   const [isMatchFound, setIsMatchFound] = useState(false);
   const location = useLocation();
-  const matchParams = location.state || {};
+
+  const getMatchParams = () => {
+    const stateParams = location.state;
+    if (stateParams) return stateParams;
+
+    const stored = sessionStorage.getItem("matchingParams");
+    return stored ? JSON.parse(stored) : {};
+  };
+  const matchParams = getMatchParams();
 
   const navigate = useNavigate();
 
@@ -26,42 +34,111 @@ export const MatchingPage = () => {
   const isValidParams =
     matchParams?.userId && matchParams?.topics && matchParams?.difficulty;
 
+  const joinQueue = () => {
+    mutation.mutate(
+      {
+        userId: matchParams.userId,
+        topics: matchParams.topics,
+        difficulty: matchParams.difficulty,
+      },
+      {
+        onSuccess: (data) => {
+          console.log(data);
+          setHasJoinedQueue(true);
+        },
+        onError: (e) => {
+          console.error("Match request failed:", e);
+        },
+      },
+    );
+  };
   // biome-ignore lint/correctness/useExhaustiveDependencies: Only run once on mount
   useEffect(() => {
-    // TODO: Add error alert
     if (!isValidParams || error) {
       exitQueue();
       return;
     } else {
-      mutation.mutate(
-        {
-          userId: matchParams.userId,
-          topics: matchParams.topics,
-          difficulty: matchParams.difficulty,
-        },
-        {
-          onSuccess: (data) => {
-            console.log(data);
-            setHasJoinedQueue(true);
-          },
-          onError: (e) => {
-            console.error("Match request failed:", e);
-          },
-        },
-      );
+      joinQueue();
     }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        exitQueue();
+      } else if (document.visibilityState === "visible") {
+        joinQueue();
+      }
+    };
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+
+    const handleUnload = () => {
+      exitQueue();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
+    };
   }, []);
+
+  // Separate effect for navigation blocking that has access to current state
+  useEffect(() => {
+    const handlePopState = () => {
+      console.log(
+        "popstate fired, hasJoinedQueue:",
+        hasJoinedQueue,
+        "isMatchFound:",
+        isMatchFound,
+      );
+
+      if (hasJoinedQueue && !isMatchFound) {
+        const confirmPrompt = window.confirm(
+          "Are you sure you want to leave? You will exit the queue.",
+        );
+
+        if (!confirmPrompt) {
+          // User wants to stay
+          window.history.pushState(null, "", window.location.pathname);
+          return;
+        } else {
+          // User confirmed - clean exit
+          exitQueue();
+          setHasJoinedQueue(false);
+          // Navigate back to home page
+          navigate("/", { replace: true });
+        }
+      }
+    };
+
+    if (hasJoinedQueue && !isMatchFound) {
+      // Add history entry when we need to block navigation
+      window.history.pushState(null, "", window.location.pathname);
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+  }, [hasJoinedQueue, isMatchFound, exitQueue, navigate]);
 
   useEffect(() => {
     if (data && data.status === 2) {
       // Match found
       setIsMatchFound(true);
+      exitQueue();
 
       setTimeout(() => {
         navigate("/session", { state: { sessionId: data.matchId } });
       }, 2000);
     }
-  }, [data, navigate]);
+  }, [data, navigate, exitQueue]);
 
   return (
     <div className="flex flex-col items-center justify-center p-5 m-4">

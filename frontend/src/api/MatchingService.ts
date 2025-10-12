@@ -47,10 +47,10 @@ export const requestMatch = async ({
   return response;
 };
 
-export const cancelMatch = async (userId: string): Promise<void> => {
-  console.log("Cancelling match for user:", userId);
+export const cancelMatch = async (matchId: string): Promise<void> => {
+  console.log("Cancelling match:", matchId);
   const response = await matchingServiceApiRequest<void>(
-    `/match/cancel/by-user/${userId}`,
+    `/match/cancel/${matchId}`,
     "DELETE",
   );
   return response;

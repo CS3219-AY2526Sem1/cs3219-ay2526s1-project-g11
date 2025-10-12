@@ -15,7 +15,7 @@ export const Session = () => {
           type="button"
           className="ml-auto cursor-pointer px-4 py-2 text-center font-semibold text-sm text-red-400 border border-red-400 rounded-lg hover:bg-red-400 hover:text-white transition-colors"
           onClick={() => {
-            cancelMatch(matchParams.userId).then(() => {
+            cancelMatch(matchParams.sessionId).then(() => {
               navigate("/");
             });
           }}
