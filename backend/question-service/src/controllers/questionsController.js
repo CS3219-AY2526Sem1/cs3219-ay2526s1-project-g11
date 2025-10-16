@@ -1,4 +1,4 @@
-const { fetchRandomByDifficultyAndTag } = require('../models/repository');
+const repository = require('../models/repository');
 
 // @desc Fetch questions by difficulty and topicTag
 // @route GET /questions
@@ -13,7 +13,7 @@ const getQuestionsByDifficultyAndTag = async (req, res) => {
 
         const sampleSize = Math.min(100, Math.max(1, parseInt(size, 10) || 5));
 
-        const rows = await fetchRandomByDifficultyAndTag({
+        const rows = await repository.fetchRandomByDifficultyAndTag({
           difficulty,
           tag,
           size: sampleSize,
@@ -26,4 +26,69 @@ const getQuestionsByDifficultyAndTag = async (req, res) => {
     }
 }
 
-module.exports = { getQuestionsByDifficultyAndTag };
+async function getQuestionById(req, res) {
+    try {
+        const id = req.params.id;
+        const question = await repository.fetchQuestionById(id);
+        res.status(200).json(question);
+    } catch (err) {
+        console.error(err);
+        res.status(404).json({ error: err.message });
+    }
+}
+
+async function createQuestion(req, res) {
+    try {
+        const { title, titleSlug, difficulty, question, exampleTestcases, topicTags } = req.body;
+        const newQuestion = await repository.createQuestion({
+            title,
+            titleSlug,
+            difficulty,
+            question,
+            exampleTestcases,
+            topicTags
+        });
+        res.status(201).json(newQuestion);
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({ error: err.message });
+    }
+}
+
+async function updateQuestion(req, res) {
+    try {
+        const id = req.params.id;
+        const { title, titleSlug, difficulty, question, exampleTestcases, topicTags } = req.body;
+        const updated = await repository.updateQuestion(id, {
+            title,
+            titleSlug,
+            difficulty,
+            question,
+            exampleTestcases,
+            topicTags
+        });
+        res.status(200).json(updated);
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({ error: err.message });
+    }
+}
+
+async function deleteQuestion(req, res) {
+    try {
+        const id = req.params.id;
+        await repository.deleteQuestion(id);
+        res.status(204).send();
+    } catch (err) {
+        console.error(err);
+        res.status(404).json({ error: err.message });
+    }
+}
+
+module.exports = {
+    getQuestionsByDifficultyAndTag,
+    getQuestionById,
+    createQuestion,
+    updateQuestion,
+    deleteQuestion
+};

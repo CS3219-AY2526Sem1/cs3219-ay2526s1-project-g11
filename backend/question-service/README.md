@@ -1,14 +1,14 @@
 # Question Service API Guide
 
-### Get Questions
+### Get Random Questions By Topic And Difficulty
 
 - This endpoint allows retrieval of a random sample of questions from the database, filtered by difficulty and topicTag.
 - HTTP Method: `GET`
-- Endpoint: http://localhost:8080/questions
+- Endpoint: https://question-service-1015946686380.asia-southeast1.run.app/questions
 - Parameters:
   - Required: `difficulty` and `tag` query parameters
   - Optional: `size` query parameter (sample size to retrieve)
-  - Example: http://localhost:8080/questions?difficulty=Easy&tag=array&size=5
+  - Example: https://question-service-1015946686380.asia-southeast1.run.app/questions?difficulty=Easy&tag=array&size=5
 - Responses:
 
   | Response Code               | Explanation                                              |
@@ -39,3 +39,105 @@
         ]
     }
 ```
+
+### Get Topics
+
+- This endpoint allows retrieval of a list of all topic tags in the database.
+- HTTP Method: `GET`
+- Endpoint: https://question-service-1015946686380.asia-southeast1.run.app/topics
+- Responses:
+
+  | Response Code               | Explanation                                              |
+        |-----------------------------|----------------------------------------------------------|
+  | 200 (OK)                    | Success, question data returned                          |
+  | 500 (Internal Server Error) | Database or server error                                 |
+- Example API Successful Response:
+```
+    [
+        { "name": "Array", "slug": "array" },
+        { "name": "Math", "slug": "math" },
+        { "name": "Graph", "slug": "graph" }
+    ]
+```
+
+### Get Question By Id
+
+- This endpoint allows retrieval of a question by its id.
+- HTTP Method: `GET`
+- Endpoint: https://question-service-1015946686380.asia-southeast1.run.app/questions/:id
+- Parameters:
+  - Required: :id – the ID of the question to update
+  - Example: https://question-service-1015946686380.asia-southeast1.run.app/questions/123e4567-e89b-12d3-a456-426614174000
+- Responses:
+
+  | Response Code   | Explanation                      |
+          |-----------------|----------------------------------|
+  | 200 (OK)        | Success, question data returned  |
+  | 404 (Not Found) | Question with given ID not found |
+
+### Create Question
+
+- This endpoint allows creation of a new question.
+- HTTP Method: `POST`
+- Endpoint: https://question-service-1015946686380.asia-southeast1.run.app/questions
+- Request Body (JSON):
+```
+{
+  "title": "New Question Title",
+  "titleSlug": "new-question-title",
+  "difficulty": "Medium",
+  "question": "Describe the question here...",
+  "exampleTestcases": "[...]",
+  "topicTags": ["array", "math"]
+}
+```
+- Notes:
+  - `topicTags` must be existing slugs in the database, otherwise will return an error.
+- Responses:
+
+  | Response Code   | Explanation                      |
+            |-----------------|----------------------------------|
+  | 201 (Created)   | Question created successfully  |
+  | 400 (Bad Request) | Invalid input |
+
+### Update Question
+
+- This endpoint allows updating of an existing question
+- HTTP Method: `PUT`
+- Endpoint: https://question-service-1015946686380.asia-southeast1.run.app/questions/:id
+- Parameters:
+  - :id – the ID of the question to update
+- Notes:
+    - Updating topicTags will replace the existing tags.
+    - All topicTags must exist; otherwise, an error is returned.
+- Request Body (JSON) – only include fields to update:
+```
+{
+    "title": "Updated Title",
+    "difficulty": "Hard",
+    "question": "Updated question description",
+    "exampleTestcases": "[...]",
+    "topicTags": ["array", "graph"]
+}
+```
+- Responses:
+
+  | Response Code     | Explanation                      |
+              |-------------------|----------------------------------|
+  | 200 (OK)          | Question updated successfully  |
+  | 400 (Bad Request) | Invalid input |
+
+### Delete Question
+
+- This endpoint allows deleting of an existing question
+- HTTP Method: `DELETE`
+- Endpoint: https://question-service-1015946686380.asia-southeast1.run.app/questions/:id
+- Parameters:
+    - :id – the ID of the question to update
+- Responses:
+
+  | Response Code    | Explanation                      |
+                |------------------|----------------------------------|
+  | 204 (No Content) | Question deleted successfully  |
+  | 404 (Not Found)  | Question with given ID not found |
+
