@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse } from "axios";
 import type {
+  CancelMatchResponse,
   GetMatchStatusResponse,
   RequestMatchPayload,
   RequestMatchResponse,
@@ -47,9 +48,11 @@ export const requestMatch = async ({
   return response;
 };
 
-export const cancelMatch = async (matchId: string): Promise<void> => {
+export const cancelMatch = async (
+  matchId: string,
+): Promise<CancelMatchResponse> => {
   console.log("Cancelling match:", matchId);
-  const response = await matchingServiceApiRequest<void>(
+  const response = await matchingServiceApiRequest<CancelMatchResponse>(
     `/match/cancel/${matchId}`,
     "DELETE",
   );

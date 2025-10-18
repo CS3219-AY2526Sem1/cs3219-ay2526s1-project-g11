@@ -34,6 +34,10 @@ export interface RequestMatchResponse {
   status: string;
 }
 
+export interface CancelMatchResponse {
+  status: string;
+}
+
 export interface RequestMatchPayload {
   userId: string;
   topics: string[];
