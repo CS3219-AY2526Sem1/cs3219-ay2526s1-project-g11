@@ -9,6 +9,12 @@ defmodule CollabService.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
+      releases: [
+      otel_getting_started: [
+        version: "0.0.1",
+        applications: [opentelemetry: :temporary, otel_getting_started: :permanent]
+      ]
+    ],
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader]
@@ -59,6 +65,12 @@ defmodule CollabService.MixProject do
       {:req, "~> 0.5"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
+      {:opentelemetry, "~> 1.4"},
+      {:opentelemetry_api, "~> 1.2"},
+      {:opentelemetry_exporter, "~> 1.6"},
+      {:opentelemetry_phoenix, "~> 2.0"},
+      # pick one of these depending on your web server:
+      {:opentelemetry_bandit, "~> 0.2"},  # you’re using Bandit
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},

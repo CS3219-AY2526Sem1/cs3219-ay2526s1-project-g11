@@ -19,6 +19,13 @@ config :collab_service, CollabServiceWeb.Endpoint,
     tailwind: {Tailwind, :install_and_run, [:collab_service, ~w(--watch)]}
   ]
 
+config :opentelemetry, :resource, service: %{name: "collab-service"}
+config :opentelemetry, :traces_exporter, :otlp
+
+config :opentelemetry, :processors, [
+  {:otel_batch_processor, %{exporter: {:opentelemetry_stdout_formatter, []}}}
+]
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

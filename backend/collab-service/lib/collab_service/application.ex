@@ -9,6 +9,8 @@ defmodule CollabService.Application do
   @impl true
   def start(_type, _args) do
     Logger.info("========== CollabService Starting ==========")
+    :ok = OpentelemetryBandit.setup()
+    OpentelemetryPhoenix.setup(adapter: :bandit)
     children = [
       CollabServiceWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:collab_service, :dns_cluster_query) || :ignore},

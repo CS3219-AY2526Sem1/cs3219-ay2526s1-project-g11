@@ -20,6 +20,10 @@ if System.get_env("PHX_SERVER") do
   config :collab_service, CollabServiceWeb.Endpoint, server: true
 end
 
+config :opentelemetry,
+  span_processor: :batch,
+  traces_exporter: {:otel_exporter_stdout, []}
+
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
