@@ -1,29 +1,28 @@
-FROM elixir:1.17
-
+# ---- build stage ----
+FROM hexpm/elixir:1.18.4-erlang-28.1-debian-bookworm-20250908 AS build
+ENV MIX_ENV=prod
 WORKDIR /app
 
-# Install hex and rebar
-RUN mix local.hex --force && \
-  mix local.rebar --force
+RUN apt-get update && apt-get install -y build-essential git && rm -rf /var/lib/apt/lists/*
 
-# Copy mix files
-COPY mix.exs mix.lock* ./
+RUN mix local.hex --force && mix local.rebar --force
 
-# Get dependencies
-RUN mix deps.get
+COPY mix.exs mix.lock ./
+COPY config config
+RUN mix deps.get --only prod && mix deps.compile
 
-# Copy source code
-COPY . .
+COPY lib lib
+COPY priv priv
 
-# Set environment variables
-ENV JWT_SECRET=test
-ENV MIX_ENV=dev
-ENV PHX_HOST=0.0.0.0
-
-# Compile dependencies and application
-RUN mix deps.compile
 RUN mix compile
+RUN mix release
 
-EXPOSE 4000
+# ---- run stage ----
+FROM debian:bookworm AS run
+RUN apt-get update && apt-get install -y openssl libstdc++6 && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+ENV MIX_ENV=prod LANG=C.UTF-8 PHX_SERVER=true
 
-CMD ["mix", "phx.server"]
+COPY --from=build /app/_build/prod/rel/collab_service ./
+
+CMD ["/app/bin/collab_service", "start"]
