@@ -60,6 +60,12 @@ defmodule CollabService.Collab.SessionServer do
     GenServer.call(via(session_id), :get_current_state)
   end
 
+  def count_live_sessions() do
+    CollabService.SessionSupervisor
+    |> DynamicSupervisor.count_children()
+    |> Map.get(:active)
+  end
+
   # GenServer ----------------------------------------------------------------
   @max_participants 2
 
