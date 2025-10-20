@@ -163,7 +163,7 @@ defmodule CollabService.Chat.ChatServer do
     Logger.debug("Broadcasting chat message - session: #{session_id}, msg_id: #{message.id}")
 
     CollabServiceWeb.Endpoint.broadcast!(
-      "chat:" <> session_id, 
+      "chat:" <> session_id,
       "chat:new_message",
       message
     )

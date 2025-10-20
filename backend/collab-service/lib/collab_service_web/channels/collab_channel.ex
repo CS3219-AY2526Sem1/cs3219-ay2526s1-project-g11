@@ -88,6 +88,63 @@ defmodule CollabServiceWeb.CollabChannel do
     {:noreply, socket}
   end
 
+  def handle_in("chat:send_message", %{"text" => text}, socket) when is_binary(text) do
+    text_preview = String.slice(text, 0, 50)
+    Logger.info("Received chat message - session: #{socket.assigns.session_id}, user: #{socket.assigns.user_id}, text: \"#{text_preview}\"")
+
+    case SessionServer.add_message(
+      socket.assigns.session_id,
+      socket.assigns.user_id,
+      text
+    ) do
+      {:ok, message} ->
+        Logger.debug("Chat message added successfully - message_id: #{message.id}")
+        {:noreply, socket}
+
+      {:error, reason} ->
+        Logger.warning("Chat message rejected - session: #{socket.assigns.session_id}, user: #{socket.assigns.user_id}, reason: #{reason}")
+        push(socket, "chat:error", %{"reason" => reason})
+        {:noreply, socket}
+    end
+  end
+
+  def handle_in("chat:send_message", invalid_payload, socket) do
+    Logger.warning("Invalid chat message format - session: #{socket.assigns.session_id}, user: #{socket.assigns.user_id}, payload: #{inspect(invalid_payload)}")
+    push(socket, "chat:error", %{"reason" => "Invalid message format"})
+    {:noreply, socket}
+  end
+
+  def handle_in("chat:get_history", %{"limit" => limit}, socket) when is_integer(limit) do
+    Logger.debug("Chat history requested - session: #{socket.assigns.session_id}, user: #{socket.assigns.user_id}, limit: #{limit}")
+
+    case SessionServer.get_recent_messages(socket.assigns.session_id, limit) do
+      {:ok, messages} ->
+        Logger.debug("Sending #{length(messages)} chat messages")
+        push(socket, "chat:history", %{"messages" => messages})
+      {:error, reason} ->
+        Logger.error("Failed to get chat history - session: #{socket.assigns.session_id}, reason: #{inspect(reason)}")
+        push(socket, "chat:error", %{"reason" => "Failed to get chat history"})
+    end
+
+    {:noreply, socket}
+  end
+
+  def handle_in("chat:get_history", _params, socket) do
+    Logger.debug("Chat history requested with default limit - session: #{socket.assigns.session_id}")
+    handle_in("chat:get_history", %{"limit" => 50}, socket)
+  end
+
+  def handle_in("chat:typing", %{"typing" => typing}, socket) when is_boolean(typing) do
+    Logger.debug("Typing indicator - session: #{socket.assigns.session_id}, user: #{socket.assigns.user_id}, typing: #{typing}")
+
+    broadcast_from(socket, "chat:user_typing", %{
+      "user_id" => socket.assigns.user_id,
+      "typing" => typing
+    })
+
+    {:noreply, socket}
+  end
+
   # Handle unknown events
   def handle_in(event, payload, socket) do
     Logger.warning("Unknown event received - session: #{socket.assigns.session_id}, user: #{socket.assigns.user_id}, event: #{event}, payload: #{inspect(payload)}")

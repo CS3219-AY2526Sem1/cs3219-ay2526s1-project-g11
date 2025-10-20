@@ -75,6 +75,18 @@ defmodule CollabService.Collab.SessionServer do
     GenServer.call(via(session_id), :get_current_state)
   end
 
+    def add_message(session_id, user_id, text) do
+    GenServer.call(via(session_id), {:add_message, user_id, text})
+  end
+
+  def get_recent_messages(session_id, limit \\ 50) do
+    GenServer.call(via(session_id), {:get_recent_messages, limit})
+  end
+
+  def get_message_count(session_id) do
+    GenServer.call(via(session_id), :get_message_count)
+  end
+
   # GenServer ----------------------------------------------------------------
   @max_participants 2
 
@@ -134,7 +146,7 @@ defmodule CollabService.Collab.SessionServer do
         {:reply, {:ok, :left}, %{state | participants: new_participants, idle_ref: ref, last_activity_ms: now_ms()}}
 
       true ->
-        Logger.info("User not found - session: #{session.id}, user: #{user_id}")
+        Logger.info("User not found - session: #{state.id}, user: #{user_id}")
         {:reply, {:error, :user_not_found}, state}
     end
 
@@ -156,7 +168,7 @@ defmodule CollabService.Collab.SessionServer do
     text_preview = String.slice(state.text, 0, 50)
     text_info = if String.length(state.text) > 50, do: "#{text_preview}... (#{String.length(state.text)} chars)", else: text_preview
     Logger.debug("get_current_state - session: #{state.id}, rev: #{state.rev}, text: \"#{text_info}\"")
-    {:reply, {:ok, %{rev: state.rev, text: state.text}}, state}
+    {:reply, {:ok, %{rev: state.rev, text: state.text, messages: state.messages}}, state}
   end
 
   @impl true
@@ -191,7 +203,94 @@ defmodule CollabService.Collab.SessionServer do
     result
   end
 
+  @impl true
+  def handle_call({:add_message, user_id, text}, _from, state) do
+    # Check if user is a participant
+    # unless MapSet.member?(state.participants, user_id) do
+    #   Logger.warning("Non-participant tried to send message - session: #{state.session_id}, user: #{user_id}")
+    #   {:reply, {:error, "You must join the chat first"}, state}
+    # else
+      case validate_text(text) do
+        {:ok, clean_text} ->
+          message = create_message(state, user_id, clean_text)
+          new_state = update_state(state, message)
+
+          broadcast_message(state.id, message)
+          Logger.info("Chat message added - session: #{state.id}, user: #{user_id}, msg_id: #{message.id}")
+          {:reply, {:ok, message}, new_state}
+
+        {:error, reason} ->
+          Logger.warning("Invalid chat message - session: #{state.id}, reason: #{reason}")
+          {:reply, {:error, reason}, state}
+      end
+    # end
+  end
+
+  @impl true
+  def handle_call({:get_recent_messages, limit}, _from, state) do
+    recent_messages = state.messages
+    |> Enum.take(limit)
+    |> Enum.reverse()
+
+    {:reply, {:ok, recent_messages}, state}
+  end
+
+  @impl true
+  def handle_call(:get_message_count, _from, state) do
+    {:reply, state.message_counter, state}
+  end
+
   # Helpers -----------------------------------------------------------------
+
+  defp now_ms() do
+    System.monotonic_time(:millisecond)
+  end
+  defp validate_text(text) when is_binary(text) do
+    clean_text = String.trim(text)
+
+    cond do
+      String.length(clean_text) == 0 ->
+        {:error, "Message cannot be empty"}
+
+      String.length(clean_text) > 1000 ->
+        {:error, "Message cannot exceed 1000 characters"}
+
+      true ->
+        {:ok, clean_text}
+    end
+  end
+
+  defp validate_text(_), do: {:error, "Invalid message format"}
+
+  defp create_message(state, user_id, clean_text) do
+    %{
+      id: state.message_counter + 1,
+      user_id: user_id,
+      text: clean_text,
+      timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
+      session_id: state.id
+    }
+  end
+
+  defp update_state(state, message) do
+    # Fix: This should be [message | state.messages], not [state.messages | message]
+    new_messages = [message | state.messages] |> Enum.take(100)
+
+    %{state |
+      messages: new_messages,
+      message_counter: state.message_counter + 1
+    }
+  end
+
+  defp broadcast_message(session_id, message) do
+    Logger.debug("Broadcasting chat message - session: #{session_id}, msg_id: #{message.id}")
+
+    CollabServiceWeb.Endpoint.broadcast!(
+      "session:" <> session_id,
+      "chat:new_message",
+      message
+    )
+  end
 
   defp via(session_id), do: {:via, Registry, {CollabService.SessionRegistry, session_id}}
 
