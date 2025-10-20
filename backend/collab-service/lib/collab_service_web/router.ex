@@ -24,6 +24,7 @@ defmodule CollabServiceWeb.Router do
   scope "/api", CollabServiceWeb do
     pipe_through [:api]
     post "/sessions", SessionController, :create
+    get "/sessions/count", SessionController, :live_sessions_count
     post "/sessions/:id/end", SessionController, :end
     get "/sessions/:id", SessionController, :show
   end
