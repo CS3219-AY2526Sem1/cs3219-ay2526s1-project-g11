@@ -8,7 +8,6 @@ defmodule CollabServiceWeb.CollabChannel do
 
     Logger.info("Channel join attempt - session: #{session_id}, user: #{user_id}, params: #{inspect(params)}")
 
-    # Start both servers if needed
     case SessionServer.start_if_needed(session_id) do
       {:ok, _pid} ->
         Logger.debug("SessionServer ready for session #{session_id}")

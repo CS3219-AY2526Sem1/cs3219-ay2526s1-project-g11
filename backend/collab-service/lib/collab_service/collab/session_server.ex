@@ -5,6 +5,8 @@ defmodule CollabService.Collab.SessionServer do
   use GenServer
   require Logger
 
+  @idle_ms :timer.minutes(3)  # ← configurable
+
   # Public API -------------------------------------------------------------
 
   def start_if_needed(session_id) do
@@ -25,6 +27,19 @@ defmodule CollabService.Collab.SessionServer do
 
       pid ->
         Logger.debug("SessionServer for session #{session_id} already exists, pid: #{inspect(pid)}")
+        {:ok, pid}
+    end
+  end
+
+  def stop(session_id) do
+    case GenServer.whereis(via(session_id)) do
+      nil ->
+        Logger.info("No session #{session_id} found! Nothing done.")
+
+      pid ->
+        Logger.debug("Removing SessionServer for session #{session_id}, pid: #{inspect(pid)}.")
+        spec = {__MODULE__, session_id}
+        result = DynamicSupervisor.terminate_child(CollabService.SessionSupervisor, pid)
         {:ok, pid}
     end
   end
@@ -60,12 +75,6 @@ defmodule CollabService.Collab.SessionServer do
     GenServer.call(via(session_id), :get_current_state)
   end
 
-  def count_live_sessions() do
-    CollabService.SessionSupervisor
-    |> DynamicSupervisor.count_children()
-    |> Map.get(:active)
-  end
-
   # GenServer ----------------------------------------------------------------
   @max_participants 2
 
@@ -79,7 +88,11 @@ defmodule CollabService.Collab.SessionServer do
       id: session_id,
       rev: 0,
       text: "",
-      participants: MapSet.new()
+      messages: [],
+      message_counter: 0,
+      participants: MapSet.new(),
+      last_activity: System.monotonic_time(:millisecond),
+      idle_ref: nil
     }
 
     Logger.info("Initialized SessionServer state for session #{session_id}")
@@ -105,6 +118,31 @@ defmodule CollabService.Collab.SessionServer do
         broadcast_user_joined(state.id, user_id, MapSet.size(new_participants))
         {:reply, {:ok, :joined}, %{state | participants: new_participants}}
     end
+  end
+
+  @impl true
+  def handle_call({:leave, user_id}, _from, state) do
+    Logger.info("Leave attempt - session: #{state.id}, user: #{user_id}, current_participants: #{MapSet.size(state.participants)}/#{@max_participants}")
+
+    cond do
+      MapSet.member?(state.participants, user_id) ->
+        new_participants = MapSet.delete(state.participants, user_id)
+        broadcast_user_left(state.id, user_id, MapSet.size(new_participants))
+        ref = Process.send_after(self(), :idle_timeout, @idle_ms)
+
+        Logger.info("User #{user_id} left session: #{state.id}. Idle timer armed")
+        {:reply, {:ok, :left}, %{state | participants: new_participants, idle_ref: ref, last_activity_ms: now_ms()}}
+
+      true ->
+        Logger.info("User not found - session: #{session.id}, user: #{user_id}")
+        {:reply, {:error, :user_not_found}, state}
+    end
+
+  end
+
+  def handle_info(:idle_timeout, %{users: users} = state) do
+    Logger.info("Session idle; stopping")
+    {:stop, :normal, state}
   end
 
   @impl true
@@ -203,6 +241,16 @@ defmodule CollabService.Collab.SessionServer do
     CollabServiceWeb.Endpoint.broadcast!(
       "session:" <> session_id,
       "session:user_joined",
+      %{"user_id" => user_id, "total_participants" => total_participants}
+    )
+  end
+
+  defp broadcast_user_left(session_id, user_id, total_participants) do
+    Logger.debug("Broadcasting user left - session: #{session_id}, user: #{user_id}, total: #{total_participants}")
+
+    CollabServiceWeb.Endpoint.broadcast!(
+      "session:" <> session_id,
+      "session:user_left",
       %{"user_id" => user_id, "total_participants" => total_participants}
     )
   end

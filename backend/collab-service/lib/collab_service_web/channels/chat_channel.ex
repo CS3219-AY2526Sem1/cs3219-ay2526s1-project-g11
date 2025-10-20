@@ -3,7 +3,7 @@ defmodule CollabServiceWeb.ChatChannel do
   require Logger
   alias CollabService.Chat.ChatServer
 
-  def join("chat:" <> session_id, params, socket) do  # Note: "chat:" prefix
+  def join("chat:" <> session_id, params, socket) do  
     user_id = socket.assigns.user_id || "guest-#{:crypto.strong_rand_bytes(4) |> Base.encode64()}"
 
     Logger.info("ChatChannel join attempt - session: #{session_id}, user: #{user_id}, params: #{inspect(params)}")
