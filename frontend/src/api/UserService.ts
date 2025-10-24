@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse } from "axios";
 import type {
+  GetAllUsersResponse,
   LoginResponse,
   SignupResponse,
   VerifyTokenResponse,
@@ -37,6 +38,10 @@ export const verifyToken = async (): Promise<VerifyTokenResponse> => {
     "/auth/verify-token",
     "GET",
   );
+};
+
+export const getAllUsers = async (): Promise<GetAllUsersResponse> => {
+  return await userServiceApiRequest<GetAllUsersResponse>("/users", "GET");
 };
 
 export const userLogin = async ({
@@ -92,6 +97,22 @@ export const userUpdate = async ({
       username,
       email,
       password,
+    },
+  );
+};
+
+export const userUpdatePrivilege = async ({
+  userId,
+  isAdmin,
+}: {
+  userId: string;
+  isAdmin: boolean;
+}) => {
+  return await userServiceApiRequest<SignupResponse>(
+    `/users/${userId}/privilege`,
+    "PATCH",
+    {
+      isAdmin,
     },
   );
 };

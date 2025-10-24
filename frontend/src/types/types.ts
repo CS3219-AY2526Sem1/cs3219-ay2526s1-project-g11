@@ -21,3 +21,8 @@ export interface SignupResponse {
   message: string;
   data: User;
 }
+
+export interface GetAllUsersResponse {
+  message: string;
+  data: User[];
+}
