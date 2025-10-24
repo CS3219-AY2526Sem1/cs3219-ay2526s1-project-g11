@@ -10,6 +10,7 @@ import {
   findUserByUsernameOrEmail as _findUserByUsernameOrEmail,
   updateUserById as _updateUserById,
   updateUserPrivilegeById as _updateUserPrivilegeById,
+  createUserSessionById as _createUserSessionById,
 } from "../model/repository.js";
 
 export async function createUser(req, res) {
@@ -205,4 +206,67 @@ export function formatUserResponse(user) {
     isAdmin: user.isAdmin,
     createdAt: user.createdAt,
   };
+}
+
+export async function addSession(req, res) {
+  try {
+    const { session } = req.body;
+    if (session) {
+      const userId = req.params.id;
+      if (!isValidObjectId(userId)) {
+        return res.status(404).json({ message: `User ${userId} not found` });
+      }
+      if (
+        !session.peerUserId ||
+        !session.startTimestamp ||
+        !session.endTimestamp ||
+        !session.questionId
+      ) {
+        return res.status(400).json({
+          message: "Session data is malformed.",
+        });
+      }
+      const user = await _findUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: `User ${userId} not found` });
+      }
+
+      const updatedUser = await _createUserSessionById(userId, session);
+
+      return res.status(200).json({
+        message: `Updated sessions for user ${userId}`,
+        data: formatUserResponse(updatedUser),
+      });
+    } else {
+      return res.status(400).json({
+        message: "Session is missing!",
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ message: "Unknown error when adding session!" });
+  }
+}
+
+export async function getSessions(req, res) {
+  try {
+    const userId = req.params.id;
+    if (!isValidObjectId(userId)) {
+      return res.status(404).json({ message: `User ${userId} not found` });
+    }
+    const user = await _findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: `User ${userId} not found` });
+    }
+
+    return res.status(200).json({
+      message: `Got user sessions for ${userId}`,
+      data: user.sessions,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Could not fetch sessions!" });
+  }
 }
