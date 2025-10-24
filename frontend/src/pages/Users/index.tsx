@@ -19,9 +19,9 @@ import {
 import { format } from "date-fns";
 import { EllipsisVertical, Search } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { User } from "types/types";
 import { getAllUsers, userUpdatePrivilege } from "../../api/UserService";
 import { useAuth } from "../../context/AuthContext";
+import type { User } from "../../types/types";
 
 enum AccountFilterTypes {
   ALL = "all",
