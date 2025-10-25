@@ -2,6 +2,7 @@ import axios, { type AxiosResponse } from "axios";
 import type {
   LoginResponse,
   SignupResponse,
+  UserStatisticsResponse,
   VerifyTokenResponse,
 } from "../types/types";
 
@@ -93,5 +94,12 @@ export const userUpdate = async ({
       email,
       password,
     },
+  );
+};
+
+export const userStatistics = async ({ userId }: { userId: string }) => {
+  return await userServiceApiRequest<UserStatisticsResponse>(
+    `/users/${userId}/statistics`,
+    "GET",
   );
 };

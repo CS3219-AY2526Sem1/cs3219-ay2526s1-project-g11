@@ -75,3 +75,11 @@ export async function createUserSessionById(userId, session) {
     },
   });
 }
+
+export async function deleteUserSessionBySessionId(userId, sessionId) {
+  return UserModel.findByIdAndUpdate(userId, {
+    $pull: {
+      sessions: { _id: sessionId },
+    },
+  });
+}
