@@ -2,7 +2,7 @@ import type { JSX } from "react";
 import { Card } from "./Card";
 
 interface StatsCardProps {
-  title: string;
+  title: string | number;
   description: string;
   icon: JSX.Element;
 }

@@ -9,6 +9,8 @@ import {
   updateUserPrivilege,
   getSessions,
   addSession,
+  deleteSession,
+  getStatistics
 } from "../controller/user-controller.js";
 import {
   verifyAccessToken,
@@ -40,5 +42,9 @@ router.delete("/:id", verifyAccessToken, verifyIsOwnerOrAdmin, deleteUser);
 router.get("/:id/sessions", verifyAccessToken, getSessions);
 
 router.post("/:id/sessions", verifyAccessToken, addSession);
+
+router.delete("/:id/sessions/:sessionId", verifyAccessToken, deleteSession);
+
+router.get("/:id/statistics", verifyAccessToken, getStatistics);
 
 export default router;
