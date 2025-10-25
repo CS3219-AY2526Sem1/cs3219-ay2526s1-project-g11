@@ -1,4 +1,10 @@
-import { CodeXmlIcon, LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
+import {
+  CodeXmlIcon,
+  LogOutIcon,
+  SettingsIcon,
+  UserIcon,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
@@ -48,6 +54,14 @@ export const Header = () => {
                 <p>Settings</p>
               </div>
             </div>
+            {user.isAdmin && (
+              <Link to={{ pathname: "/users" }}>
+                <div className="cursor-pointer flex items-center py-2 px-3 hover:bg-gray-100">
+                  <Users className="w-4 h-4 mr-3" />
+                  Users
+                </div>
+              </Link>
+            )}
             <button
               type="button"
               className="py-2 px-3 text-red-400 flex items-center cursor-pointer hover:bg-gray-100"

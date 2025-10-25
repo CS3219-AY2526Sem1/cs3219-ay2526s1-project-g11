@@ -22,3 +22,20 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   return <>{children}</>;
 }
+
+export function ProtectedAdminRoute({ children }: ProtectedRouteProps) {
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.isAdmin) {
+      navigate("/login", { replace: true });
+    }
+  }, [navigate, isAuthenticated, user]);
+
+  if (!isAuthenticated) {
+    return <div>Loading...</div>;
+  }
+
+  return <>{children}</>;
+}
