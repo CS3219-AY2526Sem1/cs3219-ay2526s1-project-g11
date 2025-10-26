@@ -30,61 +30,59 @@ if (rootElement) {
         <AuthProvider>
           <BrowserRouter>
             <Theme>
-              <Theme>
-                <Header />
-                <Routes>
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <Home />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route
-                    path="/profile"
-                    element={
-                      <ProtectedRoute>
-                        <Profile />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/users"
-                    element={
-                      <ProtectedAdminRoute>
-                        <Users />
-                      </ProtectedAdminRoute>
-                    }
-                  />
-                  <Route
-                    path="/session"
-                    element={
-                      <ProtectedRoute>
-                        <Session />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/matching"
-                    element={
-                      <ProtectedRoute>
-                        <MatchingPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/history"
-                    element={
-                      <ProtectedRoute>
-                        <History />
-                      </ProtectedRoute>
-                    }
-                  />
-                </Routes>
-              </Theme>
+              <Header />
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Home />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/users"
+                  element={
+                    <ProtectedAdminRoute>
+                      <Users />
+                    </ProtectedAdminRoute>
+                  }
+                />
+                <Route
+                  path="/session"
+                  element={
+                    <ProtectedRoute>
+                      <Session />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/matching"
+                  element={
+                    <ProtectedRoute>
+                      <MatchingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/history"
+                  element={
+                    <ProtectedRoute>
+                      <History />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
             </Theme>
           </BrowserRouter>
         </AuthProvider>
