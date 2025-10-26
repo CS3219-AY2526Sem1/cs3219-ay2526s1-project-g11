@@ -22,6 +22,10 @@ export interface SignupResponse {
   data: User;
 }
 
+export interface GetAllUsersResponse {
+  message: string;
+  data: User[];
+}
 export type SessionJoinResponse = {
   user_id: string;
   rev: number;

@@ -23,10 +23,13 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@monaco-editor/react": "^4.7.0",
+    "@radix-ui/themes": "^3.2.1",
     "@tailwindcss/vite": "^4.1.13",
     "@tanstack/react-query": "^5.89.0",
+    "@tanstack/react-table": "^8.21.3",
     "axios": "^1.12.2",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "lucide-react": "^0.544.0",
     "monaco-editor": "^0.53.0",
     "phoenix": "^1.8.1",
