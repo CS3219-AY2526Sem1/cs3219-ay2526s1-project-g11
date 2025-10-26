@@ -102,3 +102,24 @@ func (r *MatchRepository) SaveUserMatch(ctx context.Context, userID string, matc
 func (r *MatchRepository) GetUserMatch(ctx context.Context, userID string) (string, error) {
 	return r.redis.Get(ctx, "user:"+userID+":matchId").Result()
 }
+
+// GetAllQueueUsers returns all users currently in all queues
+func (r *MatchRepository) GetAllQueueUsers(ctx context.Context) (map[string][]string, error) {
+	// Get all queue keys
+	keys, err := r.redis.Keys(ctx, "queue:*").Result()
+	if err != nil {
+		return nil, err
+	}
+
+	queueUsers := make(map[string][]string)
+	for _, key := range keys {
+		// Get all users in this queue
+		users, err := r.redis.ZRange(ctx, key, 0, -1).Result()
+		if err != nil {
+			continue // Skip this queue if there's an error
+		}
+		queueUsers[key] = users
+	}
+
+	return queueUsers, nil
+}
