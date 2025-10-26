@@ -67,7 +67,6 @@ export const SessionChat = () => {
   }, [sessionId, socket, user?.id]);
 
   useEffect(() => {
-    console.log(isTypingRef.current);
     if (!isTypingRef.current && inputValue.trim() !== "") {
       isTypingRef.current = true;
       channelRef.current?.push("chat:typing", {
