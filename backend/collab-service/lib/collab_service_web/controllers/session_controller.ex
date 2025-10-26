@@ -11,6 +11,11 @@ defmodule CollabServiceWeb.SessionController do
     json(conn, %{id: id})
   end
 
+  def end_session(conn, %{"id" => id}) do
+    {:ok, _pid} = SessionServer.stop(id)
+    json(conn, %{id: id})
+  end
+
   def live_sessions_count(conn, _params) do
     count = floor(Registry.count(CollabService.SessionRegistry) / 2)
     json(conn, %{live_sessions: count})
