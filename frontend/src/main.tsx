@@ -13,12 +13,14 @@ import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import { Profile } from "./pages/Profile";
+import { MatchingPage } from "./pages/Matching";
 import { Session } from "./pages/Session";
 import Signup from "./pages/Signup";
 import Users from "./pages/Users";
 
 const queryClient = new QueryClient();
+
+import { TestPage } from "./pages/Test";
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
@@ -64,6 +66,14 @@ if (rootElement) {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                path="/matching"
+                element={
+                  <ProtectedRoute>
+                    <MatchingPage />
+                  </ProtectedRoute>
+                }
+              />
               </Routes>
             </Theme>
           </BrowserRouter>
@@ -71,6 +81,4 @@ if (rootElement) {
       </QueryClientProvider>
     </StrictMode>,
   );
-} else {
-  console.error("Root element not found");
 }
