@@ -9,6 +9,8 @@ import {
   updateUserPrivilege,
   getSessions,
   addSession,
+  getCompletedQuestions,
+  addCompletedQuestion,
 } from "../controller/user-controller.js";
 import {
   verifyAccessToken,
@@ -40,5 +42,11 @@ router.delete("/:id", verifyAccessToken, verifyIsOwnerOrAdmin, deleteUser);
 router.get("/:id/sessions", verifyAccessToken, getSessions);
 
 router.post("/:id/sessions", verifyAccessToken, addSession);
+
+// Completed questions routes
+
+router.get("/:id/completed-questions", verifyAccessToken, getCompletedQuestions);
+
+router.post("/:id/completed-questions", verifyAccessToken, addCompletedQuestion);
 
 export default router;

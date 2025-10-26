@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"matching-service/internal/models"
 	"time"
 
@@ -67,15 +68,27 @@ func (r *MatchRepository) PopTwo(ctx context.Context, queueKey string) ([]string
 	return users, nil
 }
 
+type MatchData struct {
+	PartnerID  string `json:"partnerId"`
+	QuestionID string `json:"questionId"`
+}
+
 func (r *MatchRepository) GetMatch(ctx context.Context, matchID string) (*models.MatchResponse, error) {
-	match, err := r.redis.Get(ctx, matchID).Result()
+	matchJSON, err := r.redis.Get(ctx, matchID).Result()
 	if err != nil {
 		return nil, err
 	}
+
+	var matchData MatchData
+	if err := json.Unmarshal([]byte(matchJSON), &matchData); err != nil {
+		return nil, err
+	}
+
 	return &models.MatchResponse{
-		MatchID:   matchID,
-		PartnerID: match,
-		Status:    "matched",
+		MatchID:    matchID,
+		PartnerID:  matchData.PartnerID,
+		QuestionID: matchData.QuestionID,
+		Status:     "matched",
 	}, nil
 }
 
@@ -88,9 +101,17 @@ func (r *MatchRepository) RemoveFromQueue(ctx context.Context, queueKey, userID 
 	return r.redis.ZRem(ctx, queueKey, userID).Err()
 }
 
-// SaveMatch stores a matchID -> partnerID mapping with a TTL so clients can poll.
-func (r *MatchRepository) SaveMatch(ctx context.Context, matchID string, partnerID string, ttl time.Duration) error {
-	return r.redis.Set(ctx, matchID, partnerID, ttl).Err()
+// SaveMatch stores match data (partnerId and questionId) with a TTL so clients can poll.
+func (r *MatchRepository) SaveMatch(ctx context.Context, matchID string, partnerID string, questionID string, ttl time.Duration) error {
+	matchData := MatchData{
+		PartnerID:  partnerID,
+		QuestionID: questionID,
+	}
+	matchJSON, err := json.Marshal(matchData)
+	if err != nil {
+		return err
+	}
+	return r.redis.Set(ctx, matchID, matchJSON, ttl).Err()
 }
 
 // SaveUserMatch stores userId -> matchId with TTL so a user can poll by userId.

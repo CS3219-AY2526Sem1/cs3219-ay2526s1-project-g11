@@ -9,6 +9,7 @@ import (
 	"matching-service/internal/repository"
 	"matching-service/internal/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -46,6 +47,19 @@ func setupRouter() *gin.Engine {
 	// Apply CORS middleware
 	r.Use(corsMiddleware())
 
+
+	// Configure CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"}, // Allow all origins for development
+		// For production, replace with specific origins:
+		// AllowOrigins:     []string{"http://localhost:3000", "https://your-frontend-domain.com"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * 3600, // 12 hours
+	}))
+
 	r.GET("/", root)
 	r.GET("/health", healthCheck)
 	return r
@@ -55,7 +69,9 @@ func main() {
 	cfg := config.Load()
 	redisClient := repository.NewRedisClient(cfg.RedisURL)
 	repo := repository.NewMatchRepository(redisClient)
-	service := services.NewMatchingService(repo)
+	userRepo := repository.NewUserRepository(cfg.UserServiceURL)
+	questionRepo := repository.NewQuestionRepository(cfg.QuestionServiceURL)
+	service := services.NewMatchingService(repo, userRepo, questionRepo)
 
 	_ = godotenv.Load(".env") // non-fatal if missing
 	appEnv := os.Getenv("APP_ENV")

@@ -11,6 +11,8 @@ import {
   updateUserById as _updateUserById,
   updateUserPrivilegeById as _updateUserPrivilegeById,
   createUserSessionById as _createUserSessionById,
+  getCompletedQuestionsByUserId as _getCompletedQuestionsByUserId,
+  markQuestionCompleted as _markQuestionCompleted,
 } from "../model/repository.js";
 
 export async function createUser(req, res) {
@@ -268,5 +270,73 @@ export async function getSessions(req, res) {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Could not fetch sessions!" });
+  }
+}
+
+export async function getCompletedQuestions(req, res) {
+  try {
+    const userId = req.params.id;
+    if (!isValidObjectId(userId)) {
+      return res.status(404).json({ message: `User ${userId} not found` });
+    }
+    const user = await _findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: `User ${userId} not found` });
+    }
+
+    const completedQuestions = await _getCompletedQuestionsByUserId(userId);
+    return res.status(200).json({
+      message: `Got completed questions for user ${userId}`,
+      data: completedQuestions,
+    });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ message: "Could not fetch completed questions!" });
+  }
+}
+
+export async function addCompletedQuestion(req, res) {
+  try {
+    const userId = req.params.id;
+    const { questionId, sessionId } = req.body;
+
+    if (!isValidObjectId(userId)) {
+      return res.status(404).json({ message: `User ${userId} not found` });
+    }
+
+    if (!questionId || !sessionId) {
+      return res
+        .status(400)
+        .json({ message: "questionId and sessionId are required" });
+    }
+
+    const user = await _findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: `User ${userId} not found` });
+    }
+
+    const updatedUser = await _markQuestionCompleted(
+      userId,
+      questionId,
+      sessionId
+    );
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ message: `Session ${sessionId} not found for user ${userId}` });
+    }
+
+    return res.status(200).json({
+      message: `Marked question ${questionId} as completed for user ${userId}`,
+      data: formatUserResponse(updatedUser),
+    });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ message: "Could not mark question as completed!" });
   }
 }
