@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"matching-service/internal/constants"
 	"matching-service/internal/models"
 	"matching-service/internal/repository"
 	"sort"
@@ -11,7 +12,9 @@ import (
 )
 
 type MatchingService struct {
-	repo *repository.MatchRepository
+	repo         *repository.MatchRepository
+	userRepo     *repository.UserRepository
+	questionRepo *repository.QuestionRepository
 }
 
 const defaultTTL = 10 * time.Minute
@@ -20,12 +23,81 @@ func buildQueueKey(topics []string, difficulty string) (joined string, queueKey 
 	copyTopics := append([]string{}, topics...)
 	sort.Strings(copyTopics)
 	joined = strings.Join(copyTopics, ",")
-	queueKey = fmt.Sprintf("queue:%s:%s", joined, difficulty)
+	queueKey = strings.Join([]string{constants.QueueKeyPrefix, difficulty, joined}, constants.QueueKeyDelimiter)
 	return
 }
 
-func NewMatchingService(repo *repository.MatchRepository) *MatchingService {
-	return &MatchingService{repo: repo}
+func NewMatchingService(repo *repository.MatchRepository, userRepo *repository.UserRepository, questionRepo *repository.QuestionRepository) *MatchingService {
+	return &MatchingService{
+		repo:         repo,
+		userRepo:     userRepo,
+		questionRepo: questionRepo,
+	}
+}
+
+// selectQuestion tries to find a suitable question for the matched users with progressive sampling
+func (s *MatchingService) selectQuestion(ctx context.Context, user1ID, user2ID string, topics []string, difficulty string) (string, error) {
+	// Fetch completed questions for both users
+	user1Completed, err := s.userRepo.GetCompletedQuestions(ctx, user1ID)
+	if err != nil {
+		// If we can't fetch completed questions, just proceed without filtering
+		user1Completed = []string{}
+	}
+
+	user2Completed, err := s.userRepo.GetCompletedQuestions(ctx, user2ID)
+	if err != nil {
+		user2Completed = []string{}
+	}
+
+	// Create a set of questions completed by both users
+	user1Set := make(map[string]bool)
+	for _, qid := range user1Completed {
+		user1Set[qid] = true
+	}
+
+	user2Set := make(map[string]bool)
+	for _, qid := range user2Completed {
+		user2Set[qid] = true
+	}
+
+	// Try progressive sampling: 10, 50, 100
+	sampleSizes := []int{10, 50, 100}
+
+	// Try to find a question neither user has completed
+	for _, size := range sampleSizes {
+		// Query question service with the first topic (matching service stores multiple topics, but question service queries by single tag)
+		tag := topics[0]
+		questions, err := s.questionRepo.GetQuestionsByDifficultyAndTag(ctx, difficulty, tag, size)
+		if err != nil {
+			continue // Try next sample size
+		}
+
+		// Filter questions: prioritize questions neither user has completed
+		for _, q := range questions {
+			if !user1Set[q.ID] && !user2Set[q.ID] {
+				return q.ID, nil
+			}
+		}
+	}
+
+	// Fallback: Allow questions where only ONE user has completed it
+	for _, size := range sampleSizes {
+		tag := topics[0]
+		questions, err := s.questionRepo.GetQuestionsByDifficultyAndTag(ctx, difficulty, tag, size)
+		if err != nil {
+			continue
+		}
+
+		for _, q := range questions {
+			// Accept if only one user completed it (not both)
+			if !(user1Set[q.ID] && user2Set[q.ID]) {
+				return q.ID, nil
+			}
+		}
+	}
+
+	// Final fallback: return "no_suitable_question" status
+	return "", fmt.Errorf("no_suitable_question")
 }
 
 func (s *MatchingService) RequestMatch(ctx context.Context, req models.MatchRequest) (*models.MatchResponse, error) {
@@ -45,8 +117,18 @@ func (s *MatchingService) RequestMatch(ctx context.Context, req models.MatchRequ
 		return &models.MatchResponse{Status: "waiting"}, nil
 	}
 
+	// Select a suitable question for the matched users
+	questionID, err := s.selectQuestion(ctx, users[0], users[1], req.Topics, req.Difficulty)
+	if err != nil {
+		// If no suitable question found, return status indicating this
+		return &models.MatchResponse{
+			Status: "no_suitable_question",
+		}, nil
+	}
+
 	matchID := fmt.Sprintf("match:%s:%d", joined, time.Now().UnixNano())
-	if err := s.repo.SaveMatch(ctx, matchID, users[1], defaultTTL); err != nil {
+	// Save match with questionID
+	if err := s.repo.SaveMatch(ctx, matchID, users[1], questionID, defaultTTL); err != nil {
 		return nil, err
 	}
 	// Save reverse lookup so either user can poll by userId
@@ -57,9 +139,10 @@ func (s *MatchingService) RequestMatch(ctx context.Context, req models.MatchRequ
 		return nil, err
 	}
 	return &models.MatchResponse{
-		MatchID:   matchID,
-		PartnerID: users[1],
-		Status:    "matched",
+		MatchID:    matchID,
+		PartnerID:  users[1],
+		QuestionID: questionID,
+		Status:     "matched",
 	}, nil
 }
 
@@ -132,14 +215,14 @@ func (s *MatchingService) GetQueueUsers(ctx context.Context) ([]models.QueueUser
 	var result []models.QueueUser
 	for queueKey, users := range queueUsers {
 		// Parse queue key to extract topics and difficulty
-		// Format: "queue:topic1,topic2:difficulty"
-		parts := strings.Split(queueKey, ":")
-		if len(parts) != 3 || parts[0] != "queue" {
+		// Format: "queue:difficulty:topic1,topic2"
+		parts := strings.Split(queueKey, constants.QueueKeyDelimiter)
+		if len(parts) != constants.QueueKeyParts || parts[0] != constants.QueueKeyPrefix {
 			continue // Skip malformed queue keys
 		}
 
-		topics := strings.Split(parts[1], ",")
-		difficulty := parts[2]
+		difficulty := parts[1]
+		topics := strings.Split(parts[2], ",")
 
 		// Add each user in this queue
 		for _, userID := range users {
