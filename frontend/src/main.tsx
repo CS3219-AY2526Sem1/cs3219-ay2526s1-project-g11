@@ -8,11 +8,13 @@ import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import { Profile } from "./pages/Profile";
+import { MatchingPage } from "./pages/Matching";
 import { Session } from "./pages/Session";
 import Signup from "./pages/Signup";
 
 const queryClient = new QueryClient();
+
+import { TestPage } from "./pages/Test";
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
@@ -34,18 +36,27 @@ if (rootElement) {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/session"
                 element={
                   <ProtectedRoute>
                     <Session />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/matching"
+                element={
+                  <ProtectedRoute>
+                    <MatchingPage />
+                  </ProtectedRoute>
+                }
+              />
+              {/* For testing only */}
+              <Route
+                path="/test"
+                element={
+                  <ProtectedRoute>
+                    <TestPage />
                   </ProtectedRoute>
                 }
               />
@@ -55,6 +66,4 @@ if (rootElement) {
       </QueryClientProvider>
     </StrictMode>,
   );
-} else {
-  console.error("Root element not found");
 }
