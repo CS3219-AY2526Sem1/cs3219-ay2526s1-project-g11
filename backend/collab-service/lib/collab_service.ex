@@ -6,4 +6,8 @@ defmodule CollabService do
   Contexts are also responsible for managing your data, regardless
   if it comes from the database, an external API or others.
   """
+
+  def live_sessions_count do
+    Registry.count(CollabService.SessionRegistry)
+  end
 end

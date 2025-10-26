@@ -16,7 +16,7 @@ defmodule CollabServiceWeb.Endpoint do
     longpoll: [connect_info: [session: @session_options]]
 
   socket "/ws", CollabServiceWeb.UserSocket,
-    websocket: [connect_info: [:peer_data]],
+    websocket: [check_origin: false],
     longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.

@@ -14,11 +14,6 @@ defmodule CollabServiceWeb.Router do
     plug :accepts, ["json"]
   end
 
-  # JWT Auth for API routes
-  pipeline :api_auth do
-    plug CollabServiceWeb.Plugs.JWTAuth
-  end
-
   scope "/", CollabServiceWeb do
     pipe_through :browser
 
@@ -29,8 +24,14 @@ defmodule CollabServiceWeb.Router do
   scope "/api", CollabServiceWeb do
     pipe_through [:api]
     post "/sessions", SessionController, :create
+    get "/sessions/count", SessionController, :live_sessions_count
     post "/sessions/:id/end", SessionController, :end
     get "/sessions/:id", SessionController, :show
+  end
+
+  scope "/health", CollabServiceWeb do
+    pipe_through :api
+    get "/", HealthController, :index
   end
 
   # Other scopes may use custom stacks.

@@ -67,3 +67,11 @@ export async function updateUserPrivilegeById(userId, isAdmin) {
 export async function deleteUserById(userId) {
   return UserModel.findByIdAndDelete(userId);
 }
+
+export async function createUserSessionById(userId, session) {
+  return UserModel.findByIdAndUpdate(userId, {
+    $push: {
+      sessions: session,
+    },
+  });
+}

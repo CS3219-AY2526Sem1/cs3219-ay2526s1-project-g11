@@ -10,9 +10,11 @@ import Config
 config :collab_service,
   generators: [timestamp_type: :utc_datetime]
 
+
 # Configures the endpoint
 config :collab_service, CollabServiceWeb.Endpoint,
-  url: [host: "localhost"],
+  check_origin: false,
+  url: [host: "https://collab-service-1015946686380.europe-west1.run.app", port: 443, scheme: "https"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: CollabServiceWeb.ErrorHTML, json: CollabServiceWeb.ErrorJSON],
@@ -21,19 +23,11 @@ config :collab_service, CollabServiceWeb.Endpoint,
   pubsub_server: CollabService.PubSub,
   live_view: [signing_salt: "1o83+uil"]
 
-# Configures the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
 # locally. You can see the emails in your browser, at "/dev/mailbox".
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
 config :collab_service, CollabService.Mailer, adapter: Swoosh.Adapters.Local
-
-config :joken, default_signer: [
-    algorithm: "HS256",
-    key: System.get_env("JWT_SECRET", "dev-secret")
-  ]
 
 # Configure esbuild (the version is required)
 config :esbuild,
