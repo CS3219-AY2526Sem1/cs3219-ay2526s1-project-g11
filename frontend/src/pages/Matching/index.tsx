@@ -130,9 +130,8 @@ export const MatchingPage = () => {
         navigate("/session", { state: { sessionId: data.matchId } });
       }, 2000);
     }
-    () => {
+    return () => {
       setIsMatchFound(false);
-      exitQueue();
     };
   }, [data, navigate, exitQueue]);
 
