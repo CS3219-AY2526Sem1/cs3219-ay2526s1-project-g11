@@ -1,3 +1,5 @@
+import { Theme } from "@radix-ui/themes";
+import "@radix-ui/themes/styles.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -9,18 +11,15 @@ import {
 } from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
-import "@radix-ui/themes/styles.css";
-import { Theme } from "@radix-ui/themes";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import { MatchingPage } from "./pages/Matching";
+import { Profile } from "./pages/Profile";
 import { Session } from "./pages/Session";
 import Signup from "./pages/Signup";
 import Users from "./pages/Users";
 
 const queryClient = new QueryClient();
-
-import { TestPage } from "./pages/Test";
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
@@ -67,13 +66,13 @@ if (rootElement) {
                   }
                 />
                 <Route
-                path="/matching"
-                element={
-                  <ProtectedRoute>
-                    <MatchingPage />
-                  </ProtectedRoute>
-                }
-              />
+                  path="/matching"
+                  element={
+                    <ProtectedRoute>
+                      <MatchingPage />
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </Theme>
           </BrowserRouter>
