@@ -13,8 +13,9 @@ type MatchResponse struct {
 	Status     string `json:"status"`
 }
 
-type QueueUser struct {
-	UserID     string   `json:"userId"`
-	Topics     []string `json:"topics"`
-	Difficulty string   `json:"difficulty"`
+type QueueInfo struct {
+	Key        string `json:"key"`
+	Difficulty string `json:"difficulty"`
+	Topics     string `json:"topics"`
+	Size       int64  `json:"size"`
 }

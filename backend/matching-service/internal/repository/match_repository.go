@@ -3,7 +3,10 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"matching-service/internal/constants"
 	"matching-service/internal/models"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -31,12 +34,14 @@ func (r *MatchRepository) Enqueue(ctx context.Context, queueKey, userID string) 
 
 // SaveUserQueue stores a mapping from userID to their queueKey
 func (r *MatchRepository) SaveUserQueue(ctx context.Context, userID, queueKey string, ttl time.Duration) error {
-	return r.redis.Set(ctx, "user:"+userID+":queue", queueKey, ttl).Err()
+	key := strings.Join([]string{constants.UserKeyPrefix, userID, constants.UserQueueKeySuffix}, constants.QueueKeyDelimiter)
+	return r.redis.Set(ctx, key, queueKey, ttl).Err()
 }
 
 // GetUserQueue fetches the queueKey for the given userID
 func (r *MatchRepository) GetUserQueue(ctx context.Context, userID string) (string, error) {
-	return r.redis.Get(ctx, "user:"+userID+":queue").Result()
+	key := strings.Join([]string{constants.UserKeyPrefix, userID, constants.UserQueueKeySuffix}, constants.QueueKeyDelimiter)
+	return r.redis.Get(ctx, key).Result()
 }
 
 // GetUserQueueRank returns the user's rank (0-based) within a queue, or -1 if not present
@@ -116,12 +121,67 @@ func (r *MatchRepository) SaveMatch(ctx context.Context, matchID string, partner
 
 // SaveUserMatch stores userId -> matchId with TTL so a user can poll by userId.
 func (r *MatchRepository) SaveUserMatch(ctx context.Context, userID string, matchID string, ttl time.Duration) error {
-	return r.redis.Set(ctx, "user:"+userID+":matchId", matchID, ttl).Err()
+	key := strings.Join([]string{constants.UserKeyPrefix, userID, constants.UserMatchIDKeySuffix}, constants.QueueKeyDelimiter)
+	return r.redis.Set(ctx, key, matchID, ttl).Err()
 }
 
 // GetUserMatch returns the matchId for a given user, if present.
 func (r *MatchRepository) GetUserMatch(ctx context.Context, userID string) (string, error) {
-	return r.redis.Get(ctx, "user:"+userID+":matchId").Result()
+	key := strings.Join([]string{constants.UserKeyPrefix, userID, constants.UserMatchIDKeySuffix}, constants.QueueKeyDelimiter)
+	return r.redis.Get(ctx, key).Result()
+}
+
+// GetAllQueues retrieves all queue information using SCAN for better performance
+func (r *MatchRepository) GetAllQueues(ctx context.Context) ([]models.QueueInfo, error) {
+	var cursor uint64
+	var queues []models.QueueInfo
+	queueMap := make(map[string]bool) // To track unique queues
+
+	pattern := constants.QueueKeyPrefix + constants.QueueKeyDelimiter + "*"
+
+	// Use SCAN instead of KEYS for better performance
+	for {
+		keys, newCursor, err := r.redis.Scan(ctx, cursor, pattern, constants.ScanBatchSize).Result()
+		if err != nil {
+			log.Printf("Error scanning Redis keys: %v", err)
+			return nil, err
+		}
+
+		for _, queueKey := range keys {
+			if queueMap[queueKey] {
+				continue // Skip if already processed
+			}
+			queueMap[queueKey] = true
+
+			// Parse queue key format
+			parts := strings.Split(queueKey, constants.QueueKeyDelimiter)
+			if len(parts) != constants.QueueKeyParts || parts[0] != constants.QueueKeyPrefix {
+				log.Printf("Skipping malformed queue key: %s", queueKey)
+				continue
+			}
+
+			// Get queue size
+			size, err := r.redis.ZCard(ctx, queueKey).Result()
+			if err != nil {
+				log.Printf("Error getting size for queue %s: %v", queueKey, err)
+				continue // Log error but continue processing other queues
+			}
+
+			queues = append(queues, models.QueueInfo{
+				Key:        queueKey,
+				Difficulty: parts[1],
+				Topics:     parts[2],
+				Size:       size,
+			})
+		}
+
+		cursor = newCursor
+		if cursor == 0 {
+			break // Scan complete
+		}
+	}
+
+	return queues, nil
 }
 
 // GetAllQueueUsers returns all users currently in all queues

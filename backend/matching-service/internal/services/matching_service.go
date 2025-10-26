@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"matching-service/internal/constants"
 	"matching-service/internal/models"
 	"matching-service/internal/repository"
 	"sort"
@@ -22,7 +23,7 @@ func buildQueueKey(topics []string, difficulty string) (joined string, queueKey 
 	copyTopics := append([]string{}, topics...)
 	sort.Strings(copyTopics)
 	joined = strings.Join(copyTopics, ",")
-	queueKey = fmt.Sprintf("queue:%s:%s", joined, difficulty)
+	queueKey = strings.Join([]string{constants.QueueKeyPrefix, difficulty, joined}, constants.QueueKeyDelimiter)
 	return
 }
 
