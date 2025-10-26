@@ -58,24 +58,32 @@ export const SessionChat = () => {
         setIsPartnerTyping(typing);
       }
     });
+    return () => {
+      channel.off("chat:new_message");
+      channel.off("chat:error");
+      channel.off("chat:user_typing");
+      channel.leave();
+    };
   }, [sessionId, socket, user?.id]);
 
   useEffect(() => {
+    console.log(isTypingRef.current);
     if (!isTypingRef.current && inputValue.trim() !== "") {
       isTypingRef.current = true;
-      channelRef.current?.push("chat:user_typing", {
+      channelRef.current?.push("chat:typing", {
         typing: true,
       });
     }
     // debounce input typing indicator
     const timer = setTimeout(() => {
       if (inputValue.trim() !== "") {
-        channelRef.current?.push("chat:user_typing", {
+        channelRef.current?.push("chat:typing", {
           typing: false,
         });
         isTypingRef.current = false;
       }
-    }, 500);
+    }, 1000);
+
     return () => clearTimeout(timer);
   }, [inputValue]);
 
@@ -120,6 +128,7 @@ export const SessionChat = () => {
             channelRef.current?.push("chat:send_message", {
               text: inputValue,
             });
+            isTypingRef.current = false;
             setInputValue("");
           }}
         >
