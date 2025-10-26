@@ -186,20 +186,32 @@ func (r *MatchRepository) GetAllQueues(ctx context.Context) ([]models.QueueInfo,
 
 // GetAllQueueUsers returns all users currently in all queues
 func (r *MatchRepository) GetAllQueueUsers(ctx context.Context) (map[string][]string, error) {
-	// Get all queue keys
-	keys, err := r.redis.Keys(ctx, "queue:*").Result()
-	if err != nil {
-		return nil, err
-	}
-
+	var cursor uint64
 	queueUsers := make(map[string][]string)
-	for _, key := range keys {
-		// Get all users in this queue
-		users, err := r.redis.ZRange(ctx, key, 0, -1).Result()
+	pattern := constants.QueueKeyPrefix + constants.QueueKeyDelimiter + "*"
+
+	// Use SCAN instead of KEYS for better performance
+	for {
+		keys, newCursor, err := r.redis.Scan(ctx, cursor, pattern, constants.ScanBatchSize).Result()
 		if err != nil {
-			continue // Skip this queue if there's an error
+			log.Printf("Error scanning Redis keys: %v", err)
+			return nil, err
 		}
-		queueUsers[key] = users
+
+		for _, queueKey := range keys {
+			// Get all users in this queue
+			users, err := r.redis.ZRange(ctx, queueKey, 0, -1).Result()
+			if err != nil {
+				log.Printf("Error getting users for queue %s: %v", queueKey, err)
+				continue // Skip this queue if there's an error
+			}
+			queueUsers[queueKey] = users
+		}
+
+		cursor = newCursor
+		if cursor == 0 {
+			break // Scan complete
+		}
 	}
 
 	return queueUsers, nil

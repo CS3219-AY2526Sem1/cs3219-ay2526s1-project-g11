@@ -215,14 +215,14 @@ func (s *MatchingService) GetQueueUsers(ctx context.Context) ([]models.QueueUser
 	var result []models.QueueUser
 	for queueKey, users := range queueUsers {
 		// Parse queue key to extract topics and difficulty
-		// Format: "queue:topic1,topic2:difficulty"
-		parts := strings.Split(queueKey, ":")
-		if len(parts) != 3 || parts[0] != "queue" {
+		// Format: "queue:difficulty:topic1,topic2"
+		parts := strings.Split(queueKey, constants.QueueKeyDelimiter)
+		if len(parts) != constants.QueueKeyParts || parts[0] != constants.QueueKeyPrefix {
 			continue // Skip malformed queue keys
 		}
 
-		topics := strings.Split(parts[1], ",")
-		difficulty := parts[2]
+		difficulty := parts[1]
+		topics := strings.Split(parts[2], ",")
 
 		// Add each user in this queue
 		for _, userID := range users {
