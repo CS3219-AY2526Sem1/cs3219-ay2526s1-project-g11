@@ -1,7 +1,7 @@
 import { UsersIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { cancelMatch } from "../../api/MatchingService";
+import { cancelMatchByUser } from "../../api/MatchingService";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import { useCheckStatus, useRequestMatch } from "../../hooks/useRequestMatch";
 import { capitalizeFirstLetter } from "../../utils";
@@ -130,6 +130,10 @@ export const MatchingPage = () => {
         navigate("/session", { state: { sessionId: data.matchId } });
       }, 2000);
     }
+    () => {
+      setIsMatchFound(false);
+      exitQueue();
+    };
   }, [data, navigate, exitQueue]);
 
   return (
@@ -160,7 +164,7 @@ export const MatchingPage = () => {
               type="button"
               className="cursor-pointer bg-gray-100/50 hover:bg-gray-100 border border-gray-200 font-semibold text-sm py-2 px-4 rounded-lg flex items-center justify-center gap-4 mt-4"
               onClick={() =>
-                cancelMatch(matchParams.userId).then(() => navigate("/"))
+                cancelMatchByUser(matchParams.userId).then(() => navigate("/"))
               }
             >
               <XIcon className="h-4 w-4 flex-shrink-0" /> Cancel Search

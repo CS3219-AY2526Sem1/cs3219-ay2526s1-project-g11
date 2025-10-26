@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 import {
-  cancelMatch,
+  cancelMatchByUser,
   getMatchStatus,
   requestMatch,
 } from "../api/MatchingService";
@@ -59,7 +59,7 @@ export const useCheckStatus = ({
   const exitQueue = useCallback(async () => {
     if (isPollingRef.current && userId) {
       try {
-        await cancelMatch(userId);
+        await cancelMatchByUser(userId);
         isPollingRef.current = false;
       } catch (error) {
         console.error("Error cancelling match:", error);
