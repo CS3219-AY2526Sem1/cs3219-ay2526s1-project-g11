@@ -1,17 +1,15 @@
 import { Editor } from "@monaco-editor/react";
 import { PlayIcon, UsersIcon } from "lucide-react";
 import type { editor } from "monaco-editor";
-import { type Channel, Socket } from "phoenix";
+import type { Channel } from "phoenix";
 import { useCallback, useEffect, useRef } from "react";
-import { useLocation } from "react-router";
 import { useAuth } from "../../../../../context/AuthContext";
+import { useSessionContext } from "../../../../../hooks/useSessionContext";
 import type {
   CodeUpdateResponse,
   SessionJoinResponse,
 } from "../../../../../types/types";
 import { computeCodeDiff } from "../../../../../utils";
-
-const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
 
 interface SessionEditorProps {
   language?: string;
@@ -20,10 +18,8 @@ interface SessionEditorProps {
 export const SessionEditor = ({
   language = "javascript",
 }: SessionEditorProps) => {
-  const { user, token } = useAuth();
-
-  const location = useLocation();
-  const matchParams = location.state || {};
+  const { user } = useAuth();
+  const { sessionId, socket } = useSessionContext();
 
   // Helper values that should not trigger rerenders
   const revRef = useRef(0);
@@ -31,11 +27,8 @@ export const SessionEditor = ({
   const localApply = useRef(false);
 
   // Refs for connection that should persist
-  const socketRef = useRef<Socket | null>(null);
   const channelRef = useRef<Channel | null>(null);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-
-  const sessionId = matchParams.sessionId;
 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
@@ -60,12 +53,6 @@ export const SessionEditor = ({
 
   // Init and join the channel on mount
   useEffect(() => {
-    const socket = new Socket(WEBSOCKET_URL, {
-      params: { token: token },
-    });
-    socket.connect();
-    socketRef.current = socket;
-
     const channel = socket.channel(`session:${sessionId}`);
     channelRef.current = channel;
 
@@ -124,14 +111,15 @@ export const SessionEditor = ({
     });
 
     return () => {
+      console.log("leaving channel");
       channel.off("code:update");
       channel.off("code:snapshot");
       channel.off("code:error");
       channel.off("code:stale");
       channel.leave();
-      socket.disconnect();
+      channelRef.current = null;
     };
-  }, [token, updateEditorContent, user, sessionId]);
+  }, [updateEditorContent, user, sessionId, socket]);
 
   const handleCodeChange = (value: string | undefined) => {
     if (localApply.current) {
