@@ -1,5 +1,4 @@
 // biome-ignore-all lint/security/noDangerouslySetInnerHtml: content is sanitized by DOMPurify
-
 import { useQuery } from "@tanstack/react-query";
 import DOMPurify from "dompurify";
 import { CodeIcon, SparklesIcon } from "lucide-react";

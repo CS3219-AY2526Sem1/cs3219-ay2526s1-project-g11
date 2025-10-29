@@ -56,7 +56,7 @@ export const Session = () => {
           </div>
           <ClockIcon className="ml-4 w-4 h-4 text-gray-400" />
           <span className="text-sm font-semibold text-gray-400 font-mono">
-            {minutes}:{seconds}
+            {minutes}:{seconds.toString().padStart(2, "0")}
           </span>
           <button
             type="button"
