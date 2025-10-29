@@ -20,6 +20,7 @@ func RegisterRoutes(router *gin.Engine, service *services.MatchingService) {
 		api.POST("/request", h.RequestMatch)
 		api.GET("/status/:id", h.MatchStatus) // example extension
 		api.GET("/status/by-user/:userId", h.MatchStatusByUser)
+		api.GET("/queue", h.GetQueue)
 		api.DELETE("/cancel/:id", h.CancelMatch)
 		api.DELETE("/cancel/by-user/:userId", h.CancelMatchByUser)
 	}
@@ -85,4 +86,13 @@ func (h *Handler) CancelMatchByUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"status": state, "matchId": res.MatchID})
+}
+
+func (h *Handler) GetQueue(c *gin.Context) {
+	users, err := h.service.GetQueueUsers(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, users)
 }

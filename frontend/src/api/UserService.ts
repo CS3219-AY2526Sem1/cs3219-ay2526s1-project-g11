@@ -1,13 +1,16 @@
 import axios, { type AxiosResponse } from "axios";
 import type {
+  GetAllUsersResponse,
   LoginResponse,
   ResetLinkResponse,
   SignupResponse,
   VerifyTokenResponse,
 } from "../types/types";
 
+const USER_API_BASE_URL = import.meta.env.VITE_USER_API_BASE_URL;
+
 const apiClient = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: USER_API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -48,6 +51,10 @@ export const verifyToken = async (
         : {},
     ],
   );
+};
+
+export const getAllUsers = async (): Promise<GetAllUsersResponse> => {
+  return await userServiceApiRequest<GetAllUsersResponse>("/users", "GET");
 };
 
 export const userLogin = async ({
@@ -118,6 +125,22 @@ export const userSendResetLink = async ({ email }: { email: string }) => {
     "POST",
     {
       email,
+    },
+  );
+};
+
+export const userUpdatePrivilege = async ({
+  userId,
+  isAdmin,
+}: {
+  userId: string;
+  isAdmin: boolean;
+}) => {
+  return await userServiceApiRequest<SignupResponse>(
+    `/users/${userId}/privilege`,
+    "PATCH",
+    {
+      isAdmin,
     },
   );
 };

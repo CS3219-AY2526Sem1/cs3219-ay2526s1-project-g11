@@ -1,5 +1,4 @@
 import UserModel from "./user-model.js";
-import "dotenv/config";
 import { connect } from "mongoose";
 
 export async function connectToDB() {
@@ -66,4 +65,33 @@ export async function updateUserPrivilegeById(userId, isAdmin) {
 
 export async function deleteUserById(userId) {
   return UserModel.findByIdAndDelete(userId);
+}
+
+export async function createUserSessionById(userId, session) {
+  return UserModel.findByIdAndUpdate(userId, {
+    $push: {
+      sessions: session,
+    },
+  });
+}
+
+export async function getCompletedQuestionsByUserId(userId) {
+  const user = await UserModel.findById(userId).select("completedQuestions");
+  return user ? user.completedQuestions : [];
+}
+
+export async function markQuestionCompleted(userId, questionId, sessionId) {
+  // Update session status to completed and add questionId to completedQuestions if not already present
+  return UserModel.findOneAndUpdate(
+    { _id: userId, "sessions._id": sessionId },
+    {
+      $set: {
+        "sessions.$.status": "completed",
+      },
+      $addToSet: {
+        completedQuestions: questionId,
+      },
+    },
+    { new: true }
+  );
 }

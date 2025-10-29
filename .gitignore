@@ -9,7 +9,6 @@ Thumbs.db
 *.log
 *.tmp
 *.temp
-.env
 .env.local
 .env.development.local
 .env.test.local
@@ -69,9 +68,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-.env
 .venv
-env/
+**/.env
 venv/
 ENV/
 env.bak/
@@ -192,11 +190,10 @@ jspm_packages/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+backend/question-service/.env
 .env.test
 
 # parcel-bundler cache
-.cache
 .parcel-cache
 
 # Next.js build output
@@ -229,3 +226,7 @@ temp/
 
 # Development files
 .dev/
+
+# database backups
+backend/question-service/db-backups/*.sql
+backend/question-service/db-backups/*.dump

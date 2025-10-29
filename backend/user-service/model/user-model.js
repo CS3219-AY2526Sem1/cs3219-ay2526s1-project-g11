@@ -31,6 +31,40 @@ const UserModelSchema = new Schema({
     required: true,
     default: false,
   },
+  sessions: [
+    {
+      peerUserId: {
+        type: String,
+        required: true,
+      },
+      startTimestamp: {
+        type: Date,
+        required: true,
+      },
+      endTimestamp: {
+        type: Date,
+        required: false,
+      },
+      duration: {
+        type: Number,
+        required: true,
+      },
+      questionId: {
+        type: String,
+        required: true,
+      },
+      status: {
+        type: String,
+        enum: ["in_progress", "completed", "abandoned"],
+        default: "in_progress",
+      },
+    },
+  ],
+  completedQuestions: [
+    {
+      type: String,
+    },
+  ],
 });
 
 export default mongoose.model("UserModel", UserModelSchema);

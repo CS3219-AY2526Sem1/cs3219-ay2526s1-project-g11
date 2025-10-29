@@ -4,9 +4,11 @@ defmodule CollabService.Application do
   @moduledoc false
 
   use Application
+  require Logger
 
   @impl true
   def start(_type, _args) do
+    Logger.info("========== CollabService Starting ==========")
     children = [
       CollabServiceWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:collab_service, :dns_cluster_query) || :ignore},
@@ -20,7 +22,8 @@ defmodule CollabService.Application do
       {Registry, keys: :unique, name: CollabService.SessionRegistry},
 
       # Start and stop sessions on demand
-      {DynamicSupervisor, strategy: :one_for_one, name: CollabService.SessionSupervisor}
+      {DynamicSupervisor, strategy: :one_for_one, name: CollabService.SessionSupervisor},
+      {DynamicSupervisor, strategy: :one_for_one, name: CollabService.ChatSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

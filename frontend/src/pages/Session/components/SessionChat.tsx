@@ -1,15 +1,22 @@
 import { MessageCircleIcon, SendIcon } from "lucide-react";
+import type { Channel } from "phoenix";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import { useSessionContext } from "../../../hooks/useSessionContext";
 import { twcn } from "../../../utils";
 
 export const SessionChat = () => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<{ userId: string; text: string }[]>([
-    { userId: "1", text: "Hello, how are you?" },
-  ]);
+  const { socket, sessionId } = useSessionContext();
+
+  const [messages, setMessages] = useState<{ user_id: string; text: string }[]>(
+    [],
+  );
   const [inputValue, setInputValue] = useState("");
+  const [isPartnerTyping, setIsPartnerTyping] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+  const channelRef = useRef<Channel | null>(null);
+  const isTypingRef = useRef(false);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: This should run whenever messages changes
   useEffect(() => {
@@ -23,6 +30,61 @@ export const SessionChat = () => {
     };
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    const channel = socket.channel(`chat:${sessionId}`);
+    channelRef.current = channel;
+
+    channel
+      .join()
+      .receive("ok", (response) => {
+        console.log("Joined chat channel successfully");
+        if (response.chat_messages && response.chat_messages.length > 0) {
+          setMessages(response.chat_messages);
+        }
+      })
+      .receive("error", (err) => {
+        console.error("Failed to join chat channel:", err);
+      });
+    channel.on("chat:new_message", (message) => {
+      console.log("Received new chat message:", message);
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+    channel.on("chat:error", ({ reason }: { reason: string }) =>
+      console.error(`Chat error: ${reason}`),
+    );
+    channel.on("chat:user_typing", ({ user_id, typing }) => {
+      if (user_id !== user?.id) {
+        setIsPartnerTyping(typing);
+      }
+    });
+    return () => {
+      channel.off("chat:new_message");
+      channel.off("chat:error");
+      channel.off("chat:user_typing");
+      channel.leave();
+    };
+  }, [sessionId, socket, user?.id]);
+
+  useEffect(() => {
+    if (!isTypingRef.current && inputValue.trim() !== "") {
+      isTypingRef.current = true;
+      channelRef.current?.push("chat:typing", {
+        typing: true,
+      });
+    }
+    // debounce input typing indicator
+    const timer = setTimeout(() => {
+      if (inputValue.trim() !== "") {
+        channelRef.current?.push("chat:typing", {
+          typing: false,
+        });
+        isTypingRef.current = false;
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [inputValue]);
 
   return (
     <div className="w-full h-[calc(100vh-96px)] sticky top-[85px] bg-white rounded-xl shadow-lg p-4 flex flex-col gap-4">
@@ -43,8 +105,8 @@ export const SessionChat = () => {
               className={twcn(
                 "text-sm p-2 rounded-lg w-fit max-w-3/4 break-words",
                 {
-                  "bg-blue-500 text-white ml-auto": msg.userId === user?.id,
-                  "bg-gray-100 text-black": msg.userId !== user?.id,
+                  "bg-blue-500 text-white ml-auto": msg.user_id === user?.id,
+                  "bg-gray-100 text-black": msg.user_id !== user?.id,
                 },
               )}
             >
@@ -53,16 +115,19 @@ export const SessionChat = () => {
           );
         })}
       </div>
+      {isPartnerTyping && (
+        <i className="text-gray-500 animate-pulse">Partner is typing...</i>
+      )}
       <div className="flex gap-2">
         <form
           className="flex-1 flex gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             if (inputValue.trim() === "") return;
-            setMessages((prev) => [
-              ...prev,
-              { userId: user?.id || "0", text: inputValue },
-            ]);
+            channelRef.current?.push("chat:send_message", {
+              text: inputValue,
+            });
+            isTypingRef.current = false;
             setInputValue("");
           }}
         >
