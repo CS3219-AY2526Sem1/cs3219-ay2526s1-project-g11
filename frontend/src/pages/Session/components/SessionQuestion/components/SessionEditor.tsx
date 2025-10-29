@@ -144,7 +144,7 @@ export const SessionEditor = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 h-1/2">
       <div className="rounded-md overflow-hidden w-full h-full shadow-4xl py-2 bg-[#1E1E1E]">
         <Editor
           height="50vh"

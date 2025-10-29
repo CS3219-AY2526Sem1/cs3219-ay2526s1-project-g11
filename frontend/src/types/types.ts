@@ -57,6 +57,20 @@ export type GetMatchStatusResponse =
   | { status: 1; queue: string; position: number }
   | { status: 2; matchId: string };
 
+export type GetMatchDetailsResponse = {
+  matchId: string;
+  partnerId: string;
+  questionId: string;
+  status: string;
+};
+
+export type GetQuestionByIdResponse = {
+  title: string;
+  difficulty: string;
+  question: string;
+  example_testcases: string;
+};
+
 export type Delta = {
   from: number;
   to: number;
