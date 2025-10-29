@@ -18,6 +18,7 @@ import Login from "./pages/Login";
 import { MatchingPage } from "./pages/Matching";
 import { Profile } from "./pages/Profile";
 import { Session } from "./pages/Session";
+import { SessionEnd } from "./pages/SessionEnd";
 import Signup from "./pages/Signup";
 import Users from "./pages/Users";
 
@@ -69,6 +70,14 @@ if (rootElement) {
                   element={
                     <ProtectedRoute>
                       <Session />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/session-end"
+                  element={
+                    <ProtectedRoute>
+                      <SessionEnd />
                     </ProtectedRoute>
                   }
                 />

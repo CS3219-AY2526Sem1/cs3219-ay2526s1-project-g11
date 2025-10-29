@@ -19,7 +19,7 @@ export const SessionEditor = ({
   language = "javascript",
 }: SessionEditorProps) => {
   const { user } = useAuth();
-  const { sessionId, socket } = useSessionContext();
+  const { sessionId, socket, isSessionEnded } = useSessionContext();
 
   // Helper values that should not trigger rerenders
   const revRef = useRef(0);
@@ -120,6 +120,12 @@ export const SessionEditor = ({
       channelRef.current = null;
     };
   }, [updateEditorContent, user, sessionId, socket]);
+
+  useEffect(() => {
+    if (isSessionEnded) {
+      localStorage.setItem("finalSolution", JSON.stringify(shadowRef.current));
+    }
+  }, [isSessionEnded]);
 
   const handleCodeChange = (value: string | undefined) => {
     if (localApply.current) {

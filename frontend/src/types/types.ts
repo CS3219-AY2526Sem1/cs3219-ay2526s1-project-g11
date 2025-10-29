@@ -69,6 +69,7 @@ export type GetQuestionByIdResponse = {
   difficulty: string;
   question: string;
   example_testcases: string;
+  topic_tags: { id: number; name: string; slug: string }[];
 };
 
 export type Delta = {

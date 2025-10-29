@@ -1,4 +1,6 @@
+// biome-ignore-all lint/security/noDangerouslySetInnerHtml: content is sanitized by DOMPurify
 import { Editor } from "@monaco-editor/react";
+import DOMPurify from "dompurify";
 import {
   CircleCheckBigIcon,
   ClockIcon,
@@ -11,6 +13,14 @@ import { useNavigate } from "react-router";
 
 export const SessionEnd = () => {
   const navigate = useNavigate();
+  const finalSolution = JSON.parse(
+    localStorage.getItem("finalSolution") || "{}",
+  );
+  const questionAttempted = JSON.parse(
+    localStorage.getItem("questionAttempted") || "{}",
+  );
+  const durationString = localStorage.getItem("sessionDuration");
+  const messageCount = localStorage.getItem("messageCount");
   return (
     <div className="flex flex-col justify-center items-center p-4 gap-4">
       <CircleCheckBigIcon className="h-16 w-16 p-4 text-white rounded-full bg-green-500" />
@@ -26,12 +36,12 @@ export const SessionEnd = () => {
         <div className="flex mt-4">
           <div className="flex flex-col flex-1 items-center gap-2">
             <ClockIcon className="text-blue-500 w-10 h-10 p-2 bg-gray-100/50 rounded-xl" />
-            <b className="text-xl">30m 53s</b>
+            <b className="text-xl">{durationString}</b>
             <p className="text-sm text-gray-500">Session Duration</p>
           </div>
           <div className="flex flex-col flex-1 items-center gap-2">
             <MessageCircleIcon className="text-green-500 w-10 h-10 p-2 bg-gray-100/50 rounded-xl" />
-            <b className="text-xl">2</b>
+            <b className="text-xl">{messageCount}</b>
             <p className="text-sm text-gray-500">Messages Exchanged</p>
           </div>
         </div>
@@ -43,27 +53,50 @@ export const SessionEnd = () => {
         </div>
         <div className="text-xs font-semibold">
           <span className="text-white bg-blue-500 rounded-xl px-2 py-1 mr-2">
-            Medium
+            {questionAttempted?.difficulty}
           </span>
-          <span className="border border-gray-100 rounded-xl px-2 py-1">
-            System Design
-          </span>
+          {questionAttempted?.topic_tags?.map(
+            (tag: { id: string; name: string; slug: string }) => (
+              <span
+                key={tag.id}
+                className="border border-gray-100 rounded-xl px-2 py-1"
+              >
+                {tag.name}
+              </span>
+            ),
+          )}
         </div>
-        <div className="bg-gray-100/50 p-2 rounded-lg">problemmm</div>
+        <div className="max-h-[30vh] overflow-y-auto bg-gray-100/50 p-2 rounded-lg">
+          <h2 className="font-semibold mb-2">{questionAttempted?.title}</h2>
+          <div
+            className="text-sm flex flex-col gap-1 [&_pre]:w-full [&_pre]:whitespace-pre-wrap [&_pre]:break-words text-gray-500"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(questionAttempted?.question),
+            }}
+          />
+        </div>
         <h3 className="text-sm font-semibold">Your Final Solution:</h3>
-        <div className="rounded-md overflow-hidden w-full h-full shadow-4xl py-2 bg-[#1E1E1E]">
+        <div className="rounded-md w-full h-full shadow-4xl py-2 bg-[#1E1E1E]">
           <Editor
-            value="asdfg"
+            value={finalSolution || ""}
             language="javascript"
             height="25vh"
             theme="vs-dark"
+            options={{ readOnly: true }}
           />
         </div>
       </div>
       <button
         type="button"
         className="p-2 border border-gray-100 rounded-l flex gap-2 items-center hover:bg-gray-100/50 cursor-pointer"
-        onClick={() => navigate("/")}
+        onClick={() => {
+          navigate("/");
+          const authToken = localStorage.getItem("authToken");
+          localStorage.clear();
+          if (authToken) {
+            localStorage.setItem("authToken", authToken);
+          }
+        }}
       >
         <RotateCcwIcon className="h-4 w-4" />
         Back to Dashboard
