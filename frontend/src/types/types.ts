@@ -68,3 +68,30 @@ export type CodeUpdateResponse = {
   delta: Delta;
   by: string;
 };
+
+export interface UserSessionQuestion {
+  title: string;
+  difficulty: string;
+  topic: string;
+}
+
+export interface UserSession {
+  peerUserId: string;
+  startTimestamp: Date;
+  endTimestamp: Date;
+  questionId: string;
+  _id: string;
+  peerName?: string;
+  peerUsername?: string;
+  question: UserSessionQuestion;
+}
+
+export interface UserStatisticsResponse {
+  message: string;
+  data: {
+    totalSessions: number;
+    hoursPracticed: number;
+    peersMet: number;
+    sessions: UserSession[];
+  };
+}

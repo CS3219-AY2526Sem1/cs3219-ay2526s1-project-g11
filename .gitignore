@@ -230,3 +230,4 @@ temp/
 # database backups
 backend/question-service/db-backups/*.sql
 backend/question-service/db-backups/*.dump
+backend/user-service/.env

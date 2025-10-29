@@ -75,6 +75,14 @@ export async function createUserSessionById(userId, session) {
   });
 }
 
+export async function deleteUserSessionBySessionId(userId, sessionId) {
+  return UserModel.findByIdAndUpdate(userId, {
+    $pull: {
+      sessions: { _id: sessionId },
+    },
+  });
+}
+
 export async function getCompletedQuestionsByUserId(userId) {
   const user = await UserModel.findById(userId).select("completedQuestions");
   return user ? user.completedQuestions : [];

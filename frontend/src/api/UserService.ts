@@ -4,6 +4,7 @@ import type {
   LoginResponse,
   ResetLinkResponse,
   SignupResponse,
+  UserStatisticsResponse,
   VerifyTokenResponse,
 } from "../types/types";
 
@@ -142,5 +143,12 @@ export const userUpdatePrivilege = async ({
     {
       isAdmin,
     },
+  );
+};
+
+export const userStatistics = async ({ userId }: { userId: string }) => {
+  return await userServiceApiRequest<UserStatisticsResponse>(
+    `/users/${userId}/statistics`,
+    "GET",
   );
 };

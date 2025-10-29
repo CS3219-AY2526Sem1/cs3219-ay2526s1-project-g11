@@ -1,12 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Bolt, BookOpen, Clock, Trophy, Users } from "lucide-react";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import z from "zod";
+import { userStatistics } from "../../api/UserService";
 import { SubmitButton } from "../../components/SubmitButton";
 import { useAuth } from "../../context/AuthContext";
 import { Card } from "./Components/Card";
 import { MainCard } from "./Components/MainCard";
+import { RecentSessions } from "./Components/RecentSessions";
 import {
   type DifficultyItem,
   SelectDifficulty,
@@ -26,6 +29,13 @@ const Home = () => {
   const navigate = useNavigate();
   const { handleSubmit, control, watch } = useForm({
     resolver: zodResolver(preferenceFormSchema),
+  });
+
+  const { data: sessionStatistics } = useQuery({
+    queryKey: ["sessionStatistics", user?.id],
+    // @ts-expect-error We check that user id is available in enabled
+    queryFn: () => userStatistics({ userId: user.id }),
+    enabled: !!user,
   });
 
   const difficulty = watch("difficulty");
@@ -62,16 +72,20 @@ const Home = () => {
         <div className="flex flex-col gap-5">
           <div className="flex flex-row gap-3 flex-wrap">
             <StatsCard
-              title="12"
+              title={sessionStatistics?.data.totalSessions || 0}
               description="Sessions Completed"
               icon={<Trophy />}
             />
             <StatsCard
-              title="8.5"
+              title={sessionStatistics?.data.hoursPracticed || 0}
               description="Hours Practiced"
               icon={<Clock />}
             />
-            <StatsCard title="24" description="Peers Met" icon={<Users />} />
+            <StatsCard
+              title={sessionStatistics?.data.peersMet || 0}
+              description="Peers Met"
+              icon={<Users />}
+            />
           </div>
           <div className="flex flex-row gap-3 flex-wrap">
             <div className="flex flex-col flex-2 gap-4">
@@ -126,12 +140,9 @@ const Home = () => {
                     Average wait time: ~30 seconds
                   </p>
                 </Card>
-                <Card>
-                  <h2 className="font-bold">Recent Sessions</h2>
-                  <p className="text-sm text-gray-500">
-                    You do not have any recent sessions.
-                  </p>
-                </Card>
+                <RecentSessions
+                  sessions={sessionStatistics?.data.sessions || []}
+                />
               </div>
             </div>
           </div>

@@ -12,6 +12,7 @@ import {
 import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
 import ForgotPassword from "./pages/ForgotPassword";
+import History from "./pages/History";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import { MatchingPage } from "./pages/Matching";
@@ -76,6 +77,14 @@ if (rootElement) {
                   element={
                     <ProtectedRoute>
                       <MatchingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/history"
+                  element={
+                    <ProtectedRoute>
+                      <History />
                     </ProtectedRoute>
                   }
                 />

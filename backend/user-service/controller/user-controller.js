@@ -11,9 +11,11 @@ import {
   updateUserById as _updateUserById,
   updateUserPrivilegeById as _updateUserPrivilegeById,
   createUserSessionById as _createUserSessionById,
+  deleteUserSessionBySessionId as _deleteUserSessionBySessionId,
   getCompletedQuestionsByUserId as _getCompletedQuestionsByUserId,
   markQuestionCompleted as _markQuestionCompleted,
 } from "../model/repository.js";
+import UserModel from "../model/user-model.js";
 
 export async function createUser(req, res) {
   try {
@@ -222,7 +224,9 @@ export async function addSession(req, res) {
         !session.peerUserId ||
         !session.startTimestamp ||
         !session.endTimestamp ||
-        !session.questionId
+        !session.duration ||
+        !session.questionId ||
+        !session.question
       ) {
         return res.status(400).json({
           message: "Session data is malformed.",
@@ -273,6 +277,25 @@ export async function getSessions(req, res) {
   }
 }
 
+export async function deleteSession(req, res) {
+  try {
+    const userId = req.params.id;
+    const sessionId = req.params.sessionId;
+    if (!isValidObjectId(userId) || !isValidObjectId(sessionId)) {
+      return res
+        .status(404)
+        .json({ message: `User ${userId} or Session ${sessionId} not found` });
+    }
+    await _deleteUserSessionBySessionId(sessionId);
+    return res.status(200).json({
+      message: `Deleted session ${sessionId} from user ${userId}`,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Could not delete session!" });
+  }
+}
+
 export async function getCompletedQuestions(req, res) {
   try {
     const userId = req.params.id;
@@ -283,7 +306,6 @@ export async function getCompletedQuestions(req, res) {
     if (!user) {
       return res.status(404).json({ message: `User ${userId} not found` });
     }
-
     const completedQuestions = await _getCompletedQuestionsByUserId(userId);
     return res.status(200).json({
       message: `Got completed questions for user ${userId}`,
@@ -296,6 +318,57 @@ export async function getCompletedQuestions(req, res) {
       .json({ message: "Could not fetch completed questions!" });
   }
 }
+  
+export async function getStatistics(req, res) {
+  try {
+    const userId = req.params.id;
+    if (!isValidObjectId(userId)) {
+      return res.status(404).json({ message: `User ${userId} not found` });
+    }
+    const sessions = user.sessions || [];
+
+    const totalMinutes = sessions.reduce((total, session) => {
+      return total + (session.duration || 0);
+    }, 0);
+    const hoursPracticed = totalMinutes / 60;
+
+    const uniquePeerIds = [
+      ...new Set(sessions.map((session) => session.peerUserId)),
+    ];
+
+    const peerUsers = await UserModel.find(
+      { _id: { $in: uniquePeerIds } },
+      { _id: 1, name: 1, username: 1 }
+    );
+
+    const peerMap = peerUsers.reduce((map, peer) => {
+      map[peer._id.toString()] = {
+        name: peer.name,
+        username: peer.username,
+      };
+      return map;
+    }, {});
+
+    return res.status(200).json({
+      message: `Got user session statistics for ${userId}`,
+      data: {
+        totalSessions: sessions.length,
+        hoursPracticed: parseFloat(hoursPracticed.toFixed(2)),
+        peersMet: uniquePeerIds.length,
+        sessions: sessions.map((session) => ({
+          ...session.toObject(),
+          peerName: peerMap[session.peerUserId]?.name || "Unknown",
+          peerUsername: peerMap[session.peerUserId]?.username || "Unknown",
+        })),
+      },
+    });
+  } catch (error) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ message: "Could not fetch user session statistics!" });
+  }
+};
 
 export async function addCompletedQuestion(req, res) {
   try {
@@ -311,7 +384,6 @@ export async function addCompletedQuestion(req, res) {
         .status(400)
         .json({ message: "questionId and sessionId are required" });
     }
-
     const user = await _findUserById(userId);
     if (!user) {
       return res.status(404).json({ message: `User ${userId} not found` });

@@ -54,7 +54,7 @@ type MatchParams =
       topics: string[];
       difficulty: string;
     }
-  | {};
+  | Record<string, never>;
 
 export function getMatchParams(): MatchParams {
   const params = sessionStorage.getItem("matchingParams");
