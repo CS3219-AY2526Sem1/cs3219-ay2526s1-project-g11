@@ -11,8 +11,8 @@ import {
 } from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
-import History from "./pages/History";
 import ForgotPassword from "./pages/ForgotPassword";
+import History from "./pages/History";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import { MatchingPage } from "./pages/Matching";
