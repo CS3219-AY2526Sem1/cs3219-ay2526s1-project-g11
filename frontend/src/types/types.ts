@@ -22,6 +22,10 @@ export interface SignupResponse {
   data: User;
 }
 
+export interface ResetLinkResponse {
+  message: string;
+}
+
 export interface GetAllUsersResponse {
   message: string;
   data: User[];

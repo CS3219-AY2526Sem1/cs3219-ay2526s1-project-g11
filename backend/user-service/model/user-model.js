@@ -67,6 +67,16 @@ const UserModelSchema = new Schema({
           required: true,
         },
       },
+      status: {
+        type: String,
+        enum: ["in_progress", "completed", "abandoned"],
+        default: "in_progress",
+      },
+    },
+  ],
+  completedQuestions: [
+    {
+      type: String,
     },
   ],
 });

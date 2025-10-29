@@ -43,8 +43,8 @@ const Login = () => {
         mutation.mutate();
       }}
     >
-      <div className="min-h-screen min-w-screen absolute top-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+      <div className="min-h-screen min-w-screen absolute top-0 flex flex-col gap-4 items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="flex flex-col bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
               Welcome Back
@@ -75,7 +75,7 @@ const Login = () => {
               password
             />
             <p className="text-sm text-red-500">{error}</p>
-            <SubmitButton disabled={mutation.isPending}>Sign In</SubmitButton>
+            <SubmitButton disabled={mutation.isPending}>Login</SubmitButton>
             <p className="text-center">
               Don't have an account?{" "}
               <Link
@@ -89,6 +89,14 @@ const Login = () => {
             </p>
           </div>
         </div>
+        <Link
+          className="underline text-blue-500"
+          to={{
+            pathname: "/forgot-password",
+          }}
+        >
+          Forgot Password
+        </Link>
       </div>
     </form>
   );

@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Bolt, BookOpen, Clock, Trophy, Users } from "lucide-react";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
 import z from "zod";
 import { userStatistics } from "../../api/UserService";
 import { SubmitButton } from "../../components/SubmitButton";
@@ -25,6 +26,7 @@ type preferenceForm = z.infer<typeof preferenceFormSchema>;
 
 const Home = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { handleSubmit, control, watch } = useForm({
     resolver: zodResolver(preferenceFormSchema),
   });
@@ -40,7 +42,16 @@ const Home = () => {
   const topic = watch("topic");
 
   const onSubmit: SubmitHandler<preferenceForm> = (_data) => {
-    // TODO: navigate to matching page with these parameters
+    if (!user || !user.id) {
+      return;
+    }
+    const matchingParams = {
+      userId: user.id,
+      difficulty: _data.difficulty.name,
+      topics: [_data.topic.name],
+    };
+    sessionStorage.setItem("matchingParams", JSON.stringify(matchingParams));
+    navigate("/matching", { state: matchingParams });
   };
 
   if (!user) {

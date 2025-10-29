@@ -124,7 +124,7 @@ const Signup = () => {
             </p>
             <SubmitButton disabled={mutation.isPending}>Sign Up</SubmitButton>
             <p className="text-center">
-              Already have an accoint?{" "}
+              Already have an account?{" "}
               <Link
                 className="underline text-blue-500"
                 to={{

@@ -12,6 +12,7 @@ import {
 import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
 import History from "./pages/History";
+import ForgotPassword from "./pages/ForgotPassword";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import { MatchingPage } from "./pages/Matching";
@@ -42,6 +43,11 @@ if (rootElement) {
                 />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route
+                  path="/forgot-password/:token"
+                  element={<ForgotPassword />}
+                />
                 <Route
                   path="/profile"
                   element={

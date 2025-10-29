@@ -10,7 +10,9 @@ import {
   getSessions,
   addSession,
   deleteSession,
-  getStatistics
+  getStatistics,
+  getCompletedQuestions,
+  addCompletedQuestion,
 } from "../controller/user-controller.js";
 import {
   verifyAccessToken,
@@ -46,5 +48,11 @@ router.post("/:id/sessions", verifyAccessToken, addSession);
 router.delete("/:id/sessions/:sessionId", verifyAccessToken, deleteSession);
 
 router.get("/:id/statistics", verifyAccessToken, getStatistics);
+
+// Completed questions routes
+
+router.get("/:id/completed-questions", verifyAccessToken, getCompletedQuestions);
+
+router.post("/:id/completed-questions", verifyAccessToken, addCompletedQuestion);
 
 export default router;

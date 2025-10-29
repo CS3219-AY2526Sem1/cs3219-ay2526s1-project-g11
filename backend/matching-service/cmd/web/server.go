@@ -9,6 +9,7 @@ import (
 	"matching-service/internal/repository"
 	"matching-service/internal/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -26,25 +27,34 @@ func healthCheck(c *gin.Context) {
 }
 
 func corsMiddleware() gin.HandlerFunc {
-  return func(c *gin.Context) {
-    c.Header("Access-Control-Allow-Origin", "*")
-    c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-    c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
-    c.Header("Access-Control-Allow-Credentials", "true")
-    if c.Request.Method == "OPTIONS" {
-        c.AbortWithStatus(204)
-        return
+	return func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
 		}
-    c.Next()
+		c.Next()
 	}
 }
 
 // setupRouter builds and returns the Gin engine with all routes.
 func setupRouter() *gin.Engine {
 	r := gin.Default()
-	
-	// Apply CORS middleware
-	r.Use(corsMiddleware())
+
+	// Configure CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"}, // Allow all origins for development
+		// For production, replace with specific origins:
+		// AllowOrigins:     []string{"http://localhost:3000", "https://your-frontend-domain.com"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * 3600, // 12 hours
+	}))
 
 	r.GET("/", root)
 	r.GET("/health", healthCheck)
@@ -55,7 +65,9 @@ func main() {
 	cfg := config.Load()
 	redisClient := repository.NewRedisClient(cfg.RedisURL)
 	repo := repository.NewMatchRepository(redisClient)
-	service := services.NewMatchingService(repo)
+	userRepo := repository.NewUserRepository(cfg.UserServiceURL)
+	questionRepo := repository.NewQuestionRepository(cfg.QuestionServiceURL)
+	service := services.NewMatchingService(repo, userRepo, questionRepo)
 
 	_ = godotenv.Load(".env") // non-fatal if missing
 	appEnv := os.Getenv("APP_ENV")

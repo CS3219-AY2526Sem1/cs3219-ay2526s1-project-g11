@@ -208,7 +208,6 @@
     socket.connect();
 
     const codeChan = socket.channel(`session:${sessionId}`);
-    const chatChan = socket.channel(`chat:${sessionId}`);
 
     // Code collaboration (existing)
     function diff(oldS, newS) {
@@ -252,7 +251,7 @@
       const text = chatInput.value.trim();
       if (text) {
         log(`→ Sending chat: "${text}"`);
-        chatChan.push("chat:send_message", {text});
+        codeChan.push("chat:send_message", {text});
         chatInput.value = "";
       }
     }
@@ -275,20 +274,10 @@
       
       log(`User ID: ${myUserId}`);
       log(`Initial rev: ${rev}`);
-    })
-    .receive("error", (error) => {
-      log(`✗ Code join failed: ${JSON.stringify(error)}`);
-    });
 
-  // ADD THIS - Join chat channel
-  chatChan.join()
-    .receive("ok", (response) => {
-      log(`✓ Joined chat channel`);
-      
-      // Load chat history
-      if (response.chat_messages && response.chat_messages.length > 0) {
-        log(`Loaded ${response.chat_messages.length} chat messages`);
-        response.chat_messages.forEach(msg => {
+      if (response.messages && response.messages.length > 0) {
+        log(`Loaded ${response.messages.length} chat messages`);
+        response.messages.forEach(msg => {
           displayChatMessage(msg, msg.user_id === myUserId);
         });
       }
@@ -298,10 +287,8 @@
       sendChatBtn.disabled = false;
     })
     .receive("error", (error) => {
-      log(`✗ Chat join failed: ${JSON.stringify(error)}`);
+      log(`✗ Code join failed: ${JSON.stringify(error)}`);
     });
-
-    
 
     // Code editor events
     ed.addEventListener("input", () => {
@@ -350,18 +337,18 @@
     });
 
     // Chat events
-    chatChan.on("chat:new_message", (message) => {
+    codeChan.on("chat:new_message", (message) => {
       log(`← Chat from ${message.user_id}`);
       const isOwn = message.user_id === myUserId;
       displayChatMessage(message, isOwn);
     });
 
-    chatChan.on("chat:error", ({reason}) => {
+    codeChan.on("chat:error", ({reason}) => {
       log(`✗ Chat error: ${reason}`);
       alert("Chat error: " + reason);
     });
 
-    chatChan.on("chat:user_typing", ({user_id, typing}) => {
+    codeChan.on("chat:user_typing", ({user_id, typing}) => {
       if (user_id !== myUserId) {
         if (typing) {
           typingIndicator.textContent = `${user_id} is typing...`;
@@ -386,10 +373,10 @@
     let typingTimeout;
     chatInput.addEventListener("input", () => {
       if (chatInput.value.trim()) {
-        chatChan.push("chat:typing", {typing: true});
+        codeChan.push("chat:typing", {typing: true});
         clearTimeout(typingTimeout);
         typingTimeout = setTimeout(() => {
-          chatChan.push("chat:typing", {typing: false});
+          codeChan.push("chat:typing", {typing: false});
         }, 1000);
       }
     });

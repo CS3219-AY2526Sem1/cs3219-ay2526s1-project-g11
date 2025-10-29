@@ -47,3 +47,21 @@ export const capitalizeFirstLetter = (str: string) => {
   if (!str) return str;
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
+
+type MatchParams =
+  | {
+      userId: string;
+      topics: string[];
+      difficulty: string;
+    }
+  | {};
+
+export function getMatchParams(): MatchParams {
+  const params = sessionStorage.getItem("matchingParams");
+  if (!params) return {};
+  try {
+    return JSON.parse(params) as MatchParams;
+  } catch {
+    return {};
+  }
+}

@@ -48,12 +48,12 @@ export const requestMatch = async ({
   return response;
 };
 
-export const cancelMatch = async (
-  matchId: string,
+export const cancelMatchByUser = async (
+  userId: string,
 ): Promise<CancelMatchResponse> => {
-  console.log("Cancelling match:", matchId);
+  console.log("Cancelling match for user:", userId);
   const response = await matchingServiceApiRequest<CancelMatchResponse>(
-    `/match/cancel/${matchId}`,
+    `/match/cancel/by-user/${userId}`,
     "DELETE",
   );
   return response;
