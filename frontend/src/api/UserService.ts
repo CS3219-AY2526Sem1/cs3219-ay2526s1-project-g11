@@ -152,3 +152,20 @@ export const userStatistics = async ({ userId }: { userId: string }) => {
     "GET",
   );
 };
+
+export const adduserSessionData = async ({
+  userId,
+  session,
+}: {
+  userId: string;
+  // TODO: type session properly
+  session: Record<string, unknown>;
+}) => {
+  return await userServiceApiRequest<unknown>(
+    `/users/${userId}/sessions`,
+    "POST",
+    {
+      session,
+    },
+  );
+};

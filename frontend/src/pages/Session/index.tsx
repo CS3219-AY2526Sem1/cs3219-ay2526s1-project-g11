@@ -63,6 +63,12 @@ export const Session = () => {
     },
   });
 
+  useEffect(() => {
+    if (matchData?.partnerId) {
+      sessionStorage.setItem("partnerId", matchData.partnerId);
+    }
+  }, [matchData]);
+
   const timeString = `${minutes}:${seconds.toString().padStart(2, "0")}`;
   return (
     <SessionContextProvider

@@ -9,9 +9,13 @@ import {
   RotateCcwIcon,
   TrophyIcon,
 } from "lucide-react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useAuth } from "../../context/AuthContext";
+import { useAddSession } from "../../hooks/useAddSession";
 
 export const SessionEnd = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const finalSolutionData = localStorage.getItem("finalSolution");
   const finalSolution =
@@ -25,6 +29,23 @@ export const SessionEnd = () => {
       : null;
   const durationString = localStorage.getItem("sessionDuration");
   const messageCount = localStorage.getItem("messageCount");
+
+  const partnerId = sessionStorage.getItem("partnerId");
+  const startTimestamp = sessionStorage.getItem("startTime");
+
+  const mutation = useAddSession({
+    userId: user?.id || "",
+    partnerId: partnerId || "",
+    startTimestamp: startTimestamp || "",
+    durationString: durationString || "",
+    questionAttempted: questionAttempted || {},
+  });
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only run once on mount
+  useEffect(() => {
+    mutation.mutate();
+  }, []);
+
   return (
     <div className="flex flex-col justify-center items-center p-4 gap-4">
       <CircleCheckBigIcon className="h-16 w-16 p-4 text-white rounded-full bg-green-500" />
