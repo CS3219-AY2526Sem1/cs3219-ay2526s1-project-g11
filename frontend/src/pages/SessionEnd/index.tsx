@@ -13,12 +13,16 @@ import { useNavigate } from "react-router";
 
 export const SessionEnd = () => {
   const navigate = useNavigate();
-  const finalSolution = JSON.parse(
-    localStorage.getItem("finalSolution") || "{}",
-  );
-  const questionAttempted = JSON.parse(
-    localStorage.getItem("questionAttempted") || "{}",
-  );
+  const finalSolutionData = localStorage.getItem("finalSolution");
+  const finalSolution =
+    finalSolutionData && finalSolutionData !== "undefined"
+      ? JSON.parse(finalSolutionData)
+      : null;
+  const questionAttemptedData = localStorage.getItem("questionAttempted");
+  const questionAttempted =
+    questionAttemptedData && questionAttemptedData !== "undefined"
+      ? JSON.parse(questionAttemptedData)
+      : null;
   const durationString = localStorage.getItem("sessionDuration");
   const messageCount = localStorage.getItem("messageCount");
   return (
@@ -96,6 +100,7 @@ export const SessionEnd = () => {
           if (authToken) {
             localStorage.setItem("authToken", authToken);
           }
+          sessionStorage.removeItem(`startTime`);
         }}
       >
         <RotateCcwIcon className="h-4 w-4" />
