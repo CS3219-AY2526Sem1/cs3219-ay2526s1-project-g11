@@ -7,7 +7,7 @@ import { twcn } from "../../../utils";
 
 export const SessionChat = () => {
   const { user } = useAuth();
-  const { socket, sessionId } = useSessionContext();
+  const { socket, sessionId, isSessionEnded } = useSessionContext();
 
   const [messages, setMessages] = useState<{ user_id: string; text: string }[]>(
     [],
@@ -86,8 +86,14 @@ export const SessionChat = () => {
     return () => clearTimeout(timer);
   }, [inputValue]);
 
+  useEffect(() => {
+    if (isSessionEnded) {
+      localStorage.setItem("messageCount", JSON.stringify(messages.length));
+    }
+  }, [isSessionEnded, messages.length]);
+
   return (
-    <div className="w-full h-[calc(100vh-96px)] sticky top-[85px] bg-white rounded-xl shadow-lg p-4 flex flex-col gap-4">
+    <div className="w-full h-[85vh] sticky top-[85px] bg-white rounded-xl shadow-lg p-4 flex flex-col gap-4">
       <div className="flex items-center gap-2 font-semibold">
         <MessageCircleIcon className="w-5 h-5 text-blue-500" />
         <span>Team Chat</span>
@@ -126,6 +132,9 @@ export const SessionChat = () => {
             if (inputValue.trim() === "") return;
             channelRef.current?.push("chat:send_message", {
               text: inputValue,
+            });
+            channelRef.current?.push("chat:typing", {
+              typing: false,
             });
             isTypingRef.current = false;
             setInputValue("");

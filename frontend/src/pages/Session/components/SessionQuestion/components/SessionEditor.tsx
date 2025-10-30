@@ -19,7 +19,7 @@ export const SessionEditor = ({
   language = "javascript",
 }: SessionEditorProps) => {
   const { user } = useAuth();
-  const { sessionId, socket } = useSessionContext();
+  const { sessionId, socket, isSessionEnded } = useSessionContext();
 
   // Helper values that should not trigger rerenders
   const revRef = useRef(0);
@@ -121,6 +121,12 @@ export const SessionEditor = ({
     };
   }, [updateEditorContent, user, sessionId, socket]);
 
+  useEffect(() => {
+    if (isSessionEnded) {
+      localStorage.setItem("finalSolution", JSON.stringify(shadowRef.current));
+    }
+  }, [isSessionEnded]);
+
   const handleCodeChange = (value: string | undefined) => {
     if (localApply.current) {
       localApply.current = false;
@@ -144,7 +150,7 @@ export const SessionEditor = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 h-1/2">
       <div className="rounded-md overflow-hidden w-full h-full shadow-4xl py-2 bg-[#1E1E1E]">
         <Editor
           height="50vh"

@@ -325,6 +325,10 @@ export async function getStatistics(req, res) {
     if (!isValidObjectId(userId)) {
       return res.status(404).json({ message: `User ${userId} not found` });
     }
+    const user = await _findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: `User ${userId} not found` });
+    }
     const sessions = user.sessions || [];
 
     const totalMinutes = sessions.reduce((total, session) => {
@@ -362,7 +366,7 @@ export async function getStatistics(req, res) {
         })),
       },
     });
-  } catch (error) {
+  } catch (err) {
     console.error(err);
     return res
       .status(500)

@@ -1,6 +1,7 @@
 import axios, { type AxiosResponse } from "axios";
 import type {
   CancelMatchResponse,
+  GetMatchDetailsResponse,
   GetMatchStatusResponse,
   RequestMatchPayload,
   RequestMatchResponse,
@@ -64,6 +65,16 @@ export const getMatchStatus = async (
 ): Promise<GetMatchStatusResponse> => {
   const response = await matchingServiceApiRequest<GetMatchStatusResponse>(
     `/match/status/by-user/${userId}`,
+    "GET",
+  );
+  return response;
+};
+
+export const getMatchDetails = async (
+  matchId: string,
+): Promise<GetMatchDetailsResponse> => {
+  const response = await matchingServiceApiRequest<GetMatchDetailsResponse>(
+    `/match/status/${matchId}`,
     "GET",
   );
   return response;

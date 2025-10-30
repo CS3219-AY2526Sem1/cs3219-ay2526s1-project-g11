@@ -1,12 +1,18 @@
 import { Socket } from "phoenix";
-import { createContext, useContext, useRef } from "react";
+import type React from "react";
+import { createContext, type SetStateAction, useContext, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
+import type { GetQuestionByIdResponse } from "../types/types";
 
 const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
 
 type SessionContextValue = {
   socket: Socket;
   sessionId: string;
+  question: GetQuestionByIdResponse | undefined;
+  isSessionEnded: boolean;
+  setIsSessionEnded: React.Dispatch<SetStateAction<boolean>>;
+  partnerId: string;
 };
 
 const SessionContext = createContext<SessionContextValue | undefined>(
@@ -15,10 +21,18 @@ const SessionContext = createContext<SessionContextValue | undefined>(
 
 export const SessionContextProvider = ({
   sessionId,
+  question,
   children,
+  isSessionEnded,
+  setIsSessionEnded,
+  partnerId,
 }: {
   sessionId: string;
+  question: GetQuestionByIdResponse | undefined;
   children: React.ReactNode;
+  isSessionEnded: boolean;
+  setIsSessionEnded: React.Dispatch<SetStateAction<boolean>>;
+  partnerId: string;
 }) => {
   const { user } = useAuth();
   const socketRef = useRef<Socket>(
@@ -28,7 +42,16 @@ export const SessionContextProvider = ({
   );
   socketRef.current.connect();
   return (
-    <SessionContext.Provider value={{ socket: socketRef.current, sessionId }}>
+    <SessionContext.Provider
+      value={{
+        socket: socketRef.current,
+        sessionId,
+        question,
+        isSessionEnded,
+        setIsSessionEnded,
+        partnerId,
+      }}
+    >
       {children}
     </SessionContext.Provider>
   );
