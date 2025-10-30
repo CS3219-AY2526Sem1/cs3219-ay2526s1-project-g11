@@ -1,0 +1,387 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Collaborative Code Editor with Chat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    }
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    .editor-section {
+      flex: 2;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-section {
+      flex: 1;
+      padding: 20px;
+      border-left: 2px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      background: #f9f9f9;
+    }
+    h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    #editor {
+      width: 100%;
+      flex: 1;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      resize: none;
+    }
+    #log {
+      margin-top: 10px;
+      height: 150px;
+      overflow-y: auto;
+      background: #f5f5f5;
+      padding: 10px;
+      font-size: 12px;
+      border: 1px solid #ddd;
+      white-space: pre-wrap;
+      font-family: monospace;
+    }
+    #chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .chat-message {
+      margin-bottom: 12px;
+      padding: 8px;
+      background: #fff;
+      border-radius: 4px;
+      border-left: 3px solid #4CAF50;
+    }
+    .chat-message.own {
+      border-left-color: #2196F3;
+      background: #E3F2FD;
+    }
+    .chat-timestamp {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .chat-user {
+      font-weight: bold;
+      color: #333;
+      margin-right: 5px;
+    }
+    .chat-text {
+      color: #555;
+    }
+    .chat-input-container {
+      display: flex;
+      gap: 10px;
+    }
+    #chat-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    #send-chat {
+      padding: 10px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #send-chat:hover {
+      background: #45a049;
+    }
+    #send-chat:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    #typing-indicator {
+      font-style: italic;
+      color: #666;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 12px;
+    }
+    .status {
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .status.connected {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status.disconnected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Code Editor Section -->
+    <div class="editor-section">
+      <h2>Code Editor</h2>
+      <div id="connection-status" class="status disconnected">Disconnected</div>
+      <textarea id="editor" placeholder="Start coding..."></textarea>
+      <div>
+        <strong>Debug Log:</strong>
+        <pre id="log"></pre>
+      </div>
+    </div>
+    
+    <!-- Chat Section -->
+    <div class="chat-section">
+      <h2>Chat</h2>
+      <div id="chat-messages"></div>
+      <div class="chat-input-container">
+        <input type="text" id="chat-input" placeholder="Type a message..." disabled>
+        <button id="send-chat" disabled>Send</button>
+      </div>
+      <div id="typing-indicator"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import {Socket} from "https://cdn.skypack.dev/phoenix@1.7.11";
+
+    const sessionId = "abc";
+    const isLocal = true; // Set to false for production
+
+    // DOM elements
+    const log = (m) => {
+      const logEl = document.querySelector("#log");
+      const timestamp = new Date().toLocaleTimeString();
+      logEl.textContent += `[${timestamp}] ${m}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    };
+    
+    const ed = document.querySelector("#editor");
+    const chatMessages = document.querySelector("#chat-messages");
+    const chatInput = document.querySelector("#chat-input");
+    const sendChatBtn = document.querySelector("#send-chat");
+    const typingIndicator = document.querySelector("#typing-indicator");
+    const statusEl = document.querySelector("#connection-status");
+
+    // WebSocket setup
+    const wsUrl = isLocal 
+      ? "ws://localhost:4000/ws"
+      : "wss://collab-service-1015946686380.europe-west1.run.app/ws";
+    
+    const socket = new Socket(wsUrl);
+    
+    socket.onOpen(() => {
+      log("✓ WebSocket connected!");
+      statusEl.textContent = "Connected";
+      statusEl.className = "status connected";
+    });
+    
+    socket.onError((error) => {
+      log("✗ WebSocket error: " + JSON.stringify(error));
+      statusEl.textContent = "Error";
+      statusEl.className = "status disconnected";
+    });
+    
+    socket.onClose((event) => {
+      log("✗ WebSocket closed");
+      statusEl.textContent = "Disconnected";
+      statusEl.className = "status disconnected";
+      chatInput.disabled = true;
+      sendChatBtn.disabled = true;
+    });
+    
+    socket.connect();
+
+    const codeChan = socket.channel(`session:${sessionId}`);
+
+    // Code collaboration (existing)
+    function diff(oldS, newS) {
+      if (oldS === newS) return {from: 0, to: 0, text: ""};
+      let start = 0;
+      while (start < oldS.length && start < newS.length && oldS[start] === newS[start]) start++;
+      let oldEnd = oldS.length - 1;
+      let newEnd = newS.length - 1;
+      while (oldEnd >= start && newEnd >= start && oldS[oldEnd] === newS[newEnd]) { oldEnd--; newEnd--; }
+      const from = start;
+      const to = oldEnd + 1;
+      const text = newS.slice(start, newEnd + 1);
+      return {from, to, text};
+    }
+
+    let rev = 0;
+    let shadow = "";
+    let localApply = false;
+    let myUserId = null;
+
+    // Chat functions
+    function displayChatMessage(message, isOwn = false) {
+      const messageEl = document.createElement('div');
+      messageEl.className = 'chat-message' + (isOwn ? ' own' : '');
+      
+      const timestamp = new Date(message.timestamp).toLocaleTimeString();
+      
+      messageEl.innerHTML = `
+        <div class="chat-timestamp">${timestamp}</div>
+        <div>
+          <span class="chat-user">${escapeHtml(message.user_id)}:</span>
+          <span class="chat-text">${escapeHtml(message.text)}</span>
+        </div>
+      `;
+      
+      chatMessages.appendChild(messageEl);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sendChatMessage() {
+      const text = chatInput.value.trim();
+      if (text) {
+        log(`→ Sending chat: "${text}"`);
+        codeChan.push("chat:send_message", {text});
+        chatInput.value = "";
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Join channel
+    codeChan.join()
+    .receive("ok", (response) => { 
+      log(`✓ Joined code session ${sessionId}`);
+      
+      rev = response.rev || 0;
+      shadow = response.text || ""; 
+      ed.value = shadow;
+      myUserId = response.user_id;
+      
+      log(`User ID: ${myUserId}`);
+      log(`Initial rev: ${rev}`);
+
+      if (response.messages && response.messages.length > 0) {
+        log(`Loaded ${response.messages.length} chat messages`);
+        response.messages.forEach(msg => {
+          displayChatMessage(msg, msg.user_id === myUserId);
+        });
+      }
+      
+      // Enable chat UI
+      chatInput.disabled = false;
+      sendChatBtn.disabled = false;
+    })
+    .receive("error", (error) => {
+      log(`✗ Code join failed: ${JSON.stringify(error)}`);
+    });
+
+    // Code editor events
+    ed.addEventListener("input", () => {
+      if (localApply) return;
+      const {from, to, text} = diff(shadow, ed.value);
+      
+      if (from === to && text === "") return;
+      
+      codeChan.push("code:delta", { from, to, text, rev });
+      shadow = ed.value;
+    });
+
+    codeChan.on("code:update", (response) => {
+      const {rev: newRev, delta, by} = response;
+      rev = newRev;
+      
+      if (by !== myUserId) {
+        const v = ed.value;
+        const left = v.slice(0, delta.from);
+        const right = v.slice(delta.to);
+        localApply = true;
+        ed.value = left + delta.text + right;
+        localApply = false;
+        
+        const sLeft = shadow.slice(0, delta.from);
+        const sRight = shadow.slice(delta.to);
+        shadow = sLeft + delta.text + sRight;
+        
+        log(`← Code update from ${by}`);
+      }
+    });
+
+    codeChan.on("code:snapshot", ({rev: newRev, text}) => {
+      log(`← Snapshot received (rev ${newRev})`);
+      localApply = true;
+      ed.value = text;
+      localApply = false;
+      shadow = text;
+      rev = newRev;
+    });
+
+    codeChan.on("code:error", ({reason}) => log(`✗ Code error: ${reason}`));
+    codeChan.on("code:stale", () => {
+      log("⚠ Stale revision, requesting snapshot");
+      codeChan.push("code:request_snapshot", {});
+    });
+
+    // Chat events
+    codeChan.on("chat:new_message", (message) => {
+      log(`← Chat from ${message.user_id}`);
+      const isOwn = message.user_id === myUserId;
+      displayChatMessage(message, isOwn);
+    });
+
+    codeChan.on("chat:error", ({reason}) => {
+      log(`✗ Chat error: ${reason}`);
+      alert("Chat error: " + reason);
+    });
+
+    codeChan.on("chat:user_typing", ({user_id, typing}) => {
+      if (user_id !== myUserId) {
+        if (typing) {
+          typingIndicator.textContent = `${user_id} is typing...`;
+          setTimeout(() => typingIndicator.textContent = "", 3000);
+        } else {
+          typingIndicator.textContent = "";
+        }
+      }
+    });
+
+    // Chat UI events
+    sendChatBtn.addEventListener("click", sendChatMessage);
+    
+    chatInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
+
+    // Typing indicators
+    let typingTimeout;
+    chatInput.addEventListener("input", () => {
+      if (chatInput.value.trim()) {
+        codeChan.push("chat:typing", {typing: true});
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+          codeChan.push("chat:typing", {typing: false});
+        }, 1000);
+      }
+    });
+
+    log("Connecting to " + wsUrl);
+  </script>
+</body>
+</html>
