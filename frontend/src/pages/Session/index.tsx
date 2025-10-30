@@ -18,15 +18,10 @@ export const Session = () => {
   const params = location.state || {};
   const matchParams = getMatchParams();
 
-  const startTime = sessionStorage.getItem(
-    `session:${params.sessionId}:startTime`,
-  );
+  const startTime = sessionStorage.getItem(`startTime`);
   if (!startTime) {
     const now = Date.now();
-    sessionStorage.setItem(
-      `session:${params.sessionId}:startTime`,
-      now.toString(),
-    );
+    sessionStorage.setItem(`startTime`, now.toString());
   }
 
   const [timer, setTimer] = useState(
@@ -75,6 +70,7 @@ export const Session = () => {
       question={questionData}
       isSessionEnded={isSessionEnded}
       setIsSessionEnded={setIsSessionEnded}
+      partnerId={matchData?.partnerId || ""}
     >
       <div className="mx-6 my-4">
         <div className="flex items-center mb-2 justify-center gap-2">
@@ -99,9 +95,6 @@ export const Session = () => {
             onClick={() => {
               cancelMatchByUser(matchParams.userId).then(() => {
                 setIsSessionEnded(true);
-                sessionStorage.removeItem(
-                  `session:${params.sessionId}:startTime`,
-                );
                 localStorage.setItem("sessionDuration", timeString);
                 localStorage.setItem(
                   "questionAttempted",
