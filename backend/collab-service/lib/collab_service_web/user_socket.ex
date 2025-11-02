@@ -4,9 +4,9 @@ defmodule CollabServiceWeb.UserSocket do
   channel "session:*", CollabServiceWeb.CollabChannel
   channel "chat:*", CollabServiceWeb.ChatChannel
 
-  def connect(_params, socket, _connect_info) do
+  def connect(params, socket, _connect_info) do
     gid =
-      case _params["userId"] do
+      case params["userId"] do
         id when is_binary(id) and byte_size(id) > 0 -> id
         _ -> "guest-" <> Base.url_encode64(:crypto.strong_rand_bytes(8))
       end
