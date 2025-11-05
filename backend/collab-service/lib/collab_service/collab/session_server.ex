@@ -38,8 +38,8 @@ defmodule CollabService.Collab.SessionServer do
 
       pid ->
         Logger.debug("Removing SessionServer for session #{session_id}, pid: #{inspect(pid)}.")
-        spec = {__MODULE__, session_id}
-        result = DynamicSupervisor.terminate_child(CollabService.SessionSupervisor, pid)
+        _spec = {__MODULE__, session_id}
+        _result = DynamicSupervisor.terminate_child(CollabService.SessionSupervisor, pid)
         {:ok, pid}
     end
   end
@@ -152,10 +152,6 @@ defmodule CollabService.Collab.SessionServer do
 
   end
 
-  def handle_info(:idle_timeout, %{users: users} = state) do
-    Logger.info("Session idle; stopping")
-    {:stop, :normal, state}
-  end
 
   @impl true
   def handle_call(:get_current_rev, _from, state) do
@@ -238,6 +234,12 @@ defmodule CollabService.Collab.SessionServer do
   @impl true
   def handle_call(:get_message_count, _from, state) do
     {:reply, state.message_counter, state}
+  end
+
+  @impl true
+  def handle_info(:idle_timeout, %{users: _users} = state) do
+    Logger.info("Session idle; stopping")
+    {:stop, :normal, state}
   end
 
   # Helpers -----------------------------------------------------------------
@@ -325,7 +327,7 @@ defmodule CollabService.Collab.SessionServer do
   end
 
   defp push_snapshot(%{id: id, rev: rev, text: text}) do
-    text_preview = String.slice(text, 0, 50)
+    _text_preview = String.slice(text, 0, 50)
     Logger.info("Pushing snapshot - session: #{id}, rev: #{rev}, text_length: #{String.length(text)}")
 
     CollabServiceWeb.Endpoint.broadcast!("session:" <> id, "code:snapshot", %{

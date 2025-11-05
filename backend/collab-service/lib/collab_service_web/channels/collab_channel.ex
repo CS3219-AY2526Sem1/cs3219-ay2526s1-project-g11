@@ -49,7 +49,7 @@ defmodule CollabServiceWeb.CollabChannel do
     end
   end
 
-  def handle_in("code:delta", %{"from" => f, "to" => t, "text" => txt, "rev" => rev} = payload, socket) do
+  def handle_in("code:delta", %{"from" => f, "to" => t, "text" => txt, "rev" => rev} = _payload, socket) do
     Logger.debug("Received code:delta - session: #{socket.assigns.session_id}, user: #{socket.assigns.user_id}, rev: #{rev}, from: #{f}, to: #{t}, text: \"#{String.slice(txt, 0, 20)}\"")
 
     case SessionServer.apply_delta(
