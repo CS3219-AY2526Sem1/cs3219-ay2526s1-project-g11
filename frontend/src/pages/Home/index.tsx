@@ -19,7 +19,7 @@ import { StatsCard } from "./Components/StatsCard";
 
 const preferenceFormSchema = z.object({
   difficulty: z.custom<DifficultyItem>(),
-  topic: z.custom<TopicItem>(),
+  topic: z.array(z.custom<TopicItem>()),
 });
 
 type preferenceForm = z.infer<typeof preferenceFormSchema>;
@@ -48,7 +48,8 @@ const Home = () => {
     const matchingParams = {
       userId: user.id,
       difficulty: _data.difficulty.name,
-      topics: [_data.topic.name],
+      topics: _data.topic.flatMap((topic) => topic.topics),
+      topicNames: _data.topic.map((topic) => topic.label),
     };
     sessionStorage.setItem("matchingParams", JSON.stringify(matchingParams));
     navigate("/matching", { state: matchingParams });

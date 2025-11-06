@@ -3,47 +3,65 @@ import { Badge, BadgeColor } from "../../../components/Badge";
 
 export type TopicItem = {
   id: string;
-  name: string;
+  topics: string[];
+  label: string;
   icon: string;
 };
 
-// TODO: this shouldn't be hard coded
 const sampleDifficultyData: TopicItem[] = [
   {
-    id: "arrays_and_strings",
-    name: "Arrays & Strings",
+    id: "array",
+    topics: ["array", "string"],
+    label: "Arrays & Strings",
     icon: "📚",
   },
   {
     id: "linked_lists",
-    name: "Linked Lists",
+    topics: ["linked-list", "doubly-linked-list"],
+    label: "Linked Lists",
     icon: "🔗",
   },
   {
     id: "trees_and_graphs",
-    name: "Trees & Graphs",
+    topics: [
+      "tree",
+      "trie",
+      "binary-tree",
+      "binary-search-tree",
+      "binary-indexed-tree",
+      "segment-tree",
+      "breadth-first-search",
+      "depth-first-search",
+      "topological-sort",
+      "graph",
+    ],
+    label: "Trees & Graphs",
     icon: "🌳",
   },
   {
     id: "dynamic_programming",
-    name: "Dynamic Programming",
+    topics: ["dynamic-programming", "divide-and-conquer", "greedy"],
+    label: "Dynamic Programming",
     icon: "⚡",
   },
   {
     id: "sorting_and_searching",
-    name: "Sorting & Searching",
+    topics: [
+      "sorting",
+      "bucket-sort",
+      "counting-sort",
+      "merge-sort",
+      "radix-sort",
+      "topological-sort",
+    ],
+    label: "Sorting & Searching",
     icon: "🔍",
-  },
-  {
-    id: "system_design",
-    name: "System Design",
-    icon: "🏗️",
   },
 ];
 
 interface SelectTopicProps {
-  value: TopicItem | undefined;
-  onChange: (item: TopicItem) => void;
+  value: TopicItem[] | undefined;
+  onChange: (item: TopicItem[]) => void;
 }
 
 export const SelectTopic = ({ value, onChange }: SelectTopicProps) => {
@@ -51,10 +69,11 @@ export const SelectTopic = ({ value, onChange }: SelectTopicProps) => {
     <div className="grid gap-3 lg:grid-cols-2 sm:grid-cols-1">
       {sampleDifficultyData.map((item) => (
         <TopicCard
-          key={item.name}
+          key={item.id}
           item={item}
           onSelect={onChange}
-          isSelected={value?.id === item.id}
+          isSelected={value?.some((v) => v.id === item.id)}
+          value={value}
         />
       ))}
     </div>
@@ -64,22 +83,30 @@ export const SelectTopic = ({ value, onChange }: SelectTopicProps) => {
 interface TopicCardProps {
   item: TopicItem;
   isSelected?: boolean;
-  onSelect: (item: TopicItem) => void;
+  onSelect: (item: TopicItem[]) => void;
+  value?: TopicItem[];
 }
 
-const TopicCard = ({ item, isSelected, onSelect }: TopicCardProps) => {
+const TopicCard = ({ item, isSelected, onSelect, value }: TopicCardProps) => {
+  const handleSelect = () => {
+    if (isSelected) {
+      onSelect(value?.filter((v) => v.id !== item.id) || []);
+    } else {
+      onSelect([...(value || []), item]);
+    }
+  };
   return (
     <button
       className={twMerge(
         "flex flex-row items-center gap-4 rounded-xl border-2 py-4 px-6 cursor-pointer border-gray-200 transition-colors duration-300 hover:border-blue-300 hover:shadow-lg",
         isSelected && "border-blue-500 hover:border-blue-500 shadow-lg",
       )}
-      onClick={() => onSelect(item)}
+      onClick={handleSelect}
       type="button"
     >
       <div className="text-2xl">{item.icon && item.icon}</div>
       <div className="flex flex-col items-start gap-1 flex-1">
-        <h3 className="font-bold">{item.name}</h3>
+        <h3 className="font-bold">{item.label}</h3>
         <Badge text="Popular" color={BadgeColor.BLUE} />
       </div>
       <div

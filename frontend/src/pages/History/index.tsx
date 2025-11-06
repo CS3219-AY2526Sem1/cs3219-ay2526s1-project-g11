@@ -7,6 +7,8 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -15,11 +17,15 @@ import { useMemo, useState } from "react";
 import { userStatistics } from "../../api/UserService";
 import { useAuth } from "../../context/AuthContext";
 import type { UserSession } from "../../types/types";
+import { twcn } from "../../utils";
 
 const History = () => {
   const { user } = useAuth();
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "startTimestamp", desc: true },
+  ]);
 
   const { data } = useQuery({
     queryKey: ["userStatistics"],
@@ -33,25 +39,65 @@ const History = () => {
       {
         header: "Question",
         accessorKey: "question.title",
+        enableSorting: false,
       },
       {
         header: "Peer Name",
         accessorKey: "peerName",
+        enableSorting: false,
       },
       {
-        header: "Start Time",
+        header: ({ column }) => (
+          <Flex align="center" gap="2" className="cursor-pointer">
+            Start Time
+            <span
+              className={twcn("cursor-pointer", {
+                "opacity-50": !column.getIsSorted(),
+              })}
+            >
+              {column.getIsSorted() === "asc" ? "↑" : "↓"}
+            </span>
+          </Flex>
+        ),
         accessorKey: "startTimestamp",
-        cell: ({ getValue }) => format(getValue<Date>(), "dd/MM/yyyy"),
+        cell: ({ getValue }) => format(getValue<Date>(), "dd/MM/yyyy HH:mm:ss"),
       },
       {
-        header: "End Time",
-        accessorKey: "startTimestamp",
-        cell: ({ getValue }) => format(getValue<Date>(), "dd/MM/yyyy"),
+        header: ({ column }) => (
+          <Flex align="center" gap="2">
+            End Time
+            <span
+              className={twcn("cursor-pointer", {
+                "opacity-50": !column.getIsSorted(),
+              })}
+            >
+              {column.getIsSorted() === "asc" ? "↑" : "↓"}
+            </span>
+          </Flex>
+        ),
+        accessorKey: "endTimestamp",
+        cell: ({ getValue }) => format(getValue<Date>(), "dd/MM/yyyy HH:mm:ss"),
       },
       {
-        header: "Duration",
+        header: ({ column }) => (
+          <Flex align="center" gap="2" className="cursor-pointer">
+            Duration
+            <span
+              className={twcn("cursor-pointer", {
+                "opacity-50": !column.getIsSorted(),
+              })}
+            >
+              {column.getIsSorted() === "asc" ? "↑" : "↓"}
+            </span>
+          </Flex>
+        ),
         accessorKey: "duration",
-        cell: ({ getValue }) => getValue<number>(),
+        cell: ({ getValue }) => {
+          const value = getValue<number>();
+          const minutes = Math.floor(value / 60);
+          const seconds = value % 60;
+          return `${minutes}m ${seconds}s`;
+        },
       },
     ],
     [],
@@ -62,13 +108,16 @@ const History = () => {
     columns: userDef,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      globalFilter,
-      columnFilters,
-    },
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      globalFilter,
+      columnFilters,
+      sorting,
+    },
+    onSortingChange: setSorting,
   });
 
   return (
@@ -102,6 +151,11 @@ const History = () => {
                     <Table.ColumnHeaderCell
                       colSpan={header.colSpan}
                       key={header.id}
+                      onClick={
+                        header.column.getCanSort()
+                          ? header.column.getToggleSortingHandler()
+                          : undefined
+                      }
                     >
                       {header.isPlaceholder
                         ? null

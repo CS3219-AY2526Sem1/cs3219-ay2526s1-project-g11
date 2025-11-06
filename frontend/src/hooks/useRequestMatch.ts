@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 import {
   cancelMatchByUser,
@@ -12,6 +12,8 @@ import type {
 } from "../types/types";
 
 export const useRequestMatch = ({ userId }: { userId: string }) => {
+  const queryClient = useQueryClient();
+
   const mutation = useMutation<
     RequestMatchResponse,
     unknown,
@@ -21,6 +23,9 @@ export const useRequestMatch = ({ userId }: { userId: string }) => {
     mutationFn: async ({ topics, difficulty }: RequestMatchPayload) => {
       const response = await requestMatch({ userId, topics, difficulty });
       return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["match-status", userId] });
     },
   });
   return mutation;
@@ -39,11 +44,11 @@ export const useCheckStatus = ({
     queryKey: ["match-status", userId],
     queryFn: async () => {
       const response = await getMatchStatus(userId);
-      isPollingRef.current = response.status === 1;
+      isPollingRef.current = response.status !== 2;
       return response;
     },
     refetchInterval: (query) => {
-      if (query.state.data?.status === 1) {
+      if (query.state.data?.status !== 2) {
         // If user is waiting, poll every 2 seconds to check for updates
         return 2000;
       } else {
