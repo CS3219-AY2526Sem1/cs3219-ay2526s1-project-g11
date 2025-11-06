@@ -331,10 +331,10 @@ export async function getStatistics(req, res) {
     }
     const sessions = user.sessions || [];
 
-    const totalMinutes = sessions.reduce((total, session) => {
+    const totalSeconds = sessions.reduce((total, session) => {
       return total + (session.duration || 0);
     }, 0);
-    const hoursPracticed = totalMinutes / 60;
+    const hoursPracticed = totalSeconds / 3600;
 
     const uniquePeerIds = [
       ...new Set(sessions.map((session) => session.peerUserId)),
