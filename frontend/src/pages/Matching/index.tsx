@@ -87,6 +87,7 @@ export const MatchingPage = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("unload", handleUnload);
+      exitQueue();
     };
   }, []);
 
@@ -121,17 +122,21 @@ export const MatchingPage = () => {
   }, [hasJoinedQueue, isMatchFound, exitQueue, navigate]);
 
   useEffect(() => {
+    let timeout = null;
     if (data && data.status === 2) {
       // Match found, inform user and redirect to session page after 2 seconds
       setIsMatchFound(true);
       exitQueue();
 
-      setTimeout(() => {
+      timeout = setTimeout(() => {
         navigate("/session", { state: { sessionId: data.matchId } });
       }, 2000);
     }
     return () => {
       setIsMatchFound(false);
+      if (timeout) {
+        clearTimeout(timeout);
+      }
     };
   }, [data, navigate, exitQueue]);
 

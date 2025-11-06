@@ -9,7 +9,7 @@ import {
   RotateCcwIcon,
   TrophyIcon,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../context/AuthContext";
 import { useAddSession } from "../../hooks/useAddSession";
@@ -17,6 +17,8 @@ import { useAddSession } from "../../hooks/useAddSession";
 export const SessionEnd = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const hasSentStats = useRef(false);
+
   const finalSolutionData = localStorage.getItem("finalSolution");
   const finalSolution =
     finalSolutionData && finalSolutionData !== "undefined"
@@ -43,6 +45,8 @@ export const SessionEnd = () => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Only run once on mount
   useEffect(() => {
+    if (hasSentStats.current) return;
+    hasSentStats.current = true;
     mutation.mutate();
   }, []);
 
@@ -121,7 +125,7 @@ export const SessionEnd = () => {
           if (authToken) {
             localStorage.setItem("authToken", authToken);
           }
-          sessionStorage.removeItem(`startTime`);
+          sessionStorage.clear();
         }}
       >
         <RotateCcwIcon className="h-4 w-4" />
