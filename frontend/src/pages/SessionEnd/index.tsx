@@ -18,6 +18,7 @@ export const SessionEnd = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const hasSentStats = useRef(false);
+  const hasCleanedUp = useRef(false);
 
   const finalSolutionData = localStorage.getItem("finalSolution");
   const finalSolution =
@@ -52,13 +53,22 @@ export const SessionEnd = () => {
     hasSentStats.current = true;
     mutation.mutate();
 
-    return () => {
+    const handleBeforeUnload = () => {
+      if (hasCleanedUp.current) return;
+      hasCleanedUp.current = true;
+
       const authToken = localStorage.getItem("authToken");
       localStorage.clear();
       if (authToken) {
         localStorage.setItem("authToken", authToken);
       }
       sessionStorage.clear();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 
