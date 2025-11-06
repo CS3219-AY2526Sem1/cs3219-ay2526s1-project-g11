@@ -45,9 +45,21 @@ export const SessionEnd = () => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Only run once on mount
   useEffect(() => {
+    if (!questionAttempted || !partnerId) {
+      navigate("/");
+    }
     if (hasSentStats.current) return;
     hasSentStats.current = true;
     mutation.mutate();
+
+    return () => {
+      const authToken = localStorage.getItem("authToken");
+      localStorage.clear();
+      if (authToken) {
+        localStorage.setItem("authToken", authToken);
+      }
+      sessionStorage.clear();
+    };
   }, []);
 
   return (
@@ -120,12 +132,6 @@ export const SessionEnd = () => {
         className="p-2 border border-gray-100 rounded-l flex gap-2 items-center hover:bg-gray-100/50 cursor-pointer"
         onClick={() => {
           navigate("/");
-          const authToken = localStorage.getItem("authToken");
-          localStorage.clear();
-          if (authToken) {
-            localStorage.setItem("authToken", authToken);
-          }
-          sessionStorage.clear();
         }}
       >
         <RotateCcwIcon className="h-4 w-4" />

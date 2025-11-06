@@ -152,7 +152,7 @@ export const MatchingPage = () => {
         <p className="text-gray-500 text-sm">
           Looking for someone practicing{" "}
           <b>
-            {matchParams.topics
+            {matchParams.topicNames
               .map((topic: string) => capitalizeFirstLetter(topic))
               .join(", ")}
           </b>{" "}
