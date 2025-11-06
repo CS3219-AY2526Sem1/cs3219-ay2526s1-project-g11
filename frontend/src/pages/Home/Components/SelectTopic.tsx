@@ -3,41 +3,59 @@ import { Badge, BadgeColor } from "../../../components/Badge";
 
 export type TopicItem = {
   id: string;
-  name: string;
+  topics: string[];
+  label: string;
   icon: string;
 };
 
-// TODO: this shouldn't be hard coded
 const sampleDifficultyData: TopicItem[] = [
   {
-    id: "arrays_and_strings",
-    name: "Arrays & Strings",
+    id: "array",
+    topics: ["array", "string"],
+    label: "Arrays & Strings",
     icon: "📚",
   },
   {
     id: "linked_lists",
-    name: "Linked Lists",
+    topics: ["linked-list", "doubly-linked-list"],
+    label: "Linked Lists",
     icon: "🔗",
   },
   {
     id: "trees_and_graphs",
-    name: "Trees & Graphs",
+    topics: [
+      "tree",
+      "trie",
+      "binary-tree",
+      "binary-search-tree",
+      "binary-indexed-tree",
+      "segment-tree",
+      "breadth-first-search",
+      "depth-first-search",
+      "topological-sort",
+      "graph",
+    ],
+    label: "Trees & Graphs",
     icon: "🌳",
   },
   {
     id: "dynamic_programming",
-    name: "Dynamic Programming",
+    topics: ["dynamic-programming", "divide-and-conquer", "greedy"],
+    label: "Dynamic Programming",
     icon: "⚡",
   },
   {
     id: "sorting_and_searching",
-    name: "Sorting & Searching",
+    topics: [
+      "sorting",
+      "bucket-sort",
+      "counting-sort",
+      "merge-sort",
+      "radix-sort",
+      "topological-sort",
+    ],
+    label: "Sorting & Searching",
     icon: "🔍",
-  },
-  {
-    id: "system_design",
-    name: "System Design",
-    icon: "🏗️",
   },
 ];
 
@@ -72,7 +90,7 @@ const TopicCard = ({ item, isSelected, onSelect }: TopicCardProps) => {
     <button
       className={twMerge(
         "flex flex-row items-center gap-4 rounded-xl border-2 py-4 px-6 cursor-pointer border-gray-200 transition-colors duration-300 hover:border-blue-300 hover:shadow-lg",
-        isSelected && "border-blue-500 hover:border-blue-500 shadow-lg",
+        isSelected && "border-blue-500 hover:border-blue-500 shadow-lg"
       )}
       onClick={() => onSelect(item)}
       type="button"
@@ -85,7 +103,7 @@ const TopicCard = ({ item, isSelected, onSelect }: TopicCardProps) => {
       <div
         className={twMerge(
           "w-6 h-6 rounded-full flex items-center justify-center",
-          isSelected && "bg-blue-500",
+          isSelected && "bg-blue-500"
         )}
       >
         <div className="w-2 h-2 bg-white rounded-full" />
