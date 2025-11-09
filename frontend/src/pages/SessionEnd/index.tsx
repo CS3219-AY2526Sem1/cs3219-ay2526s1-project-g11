@@ -13,6 +13,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../context/AuthContext";
 import { useAddSession } from "../../hooks/useAddSession";
+import { handleCleanup } from "../../utils";
 
 export const SessionEnd = () => {
   const { user } = useAuth();
@@ -53,22 +54,12 @@ export const SessionEnd = () => {
     hasSentStats.current = true;
     mutation.mutate();
 
-    const handleBeforeUnload = () => {
-      if (hasCleanedUp.current) return;
-      hasCleanedUp.current = true;
-
-      const authToken = localStorage.getItem("authToken");
-      localStorage.clear();
-      if (authToken) {
-        localStorage.setItem("authToken", authToken);
-      }
-      sessionStorage.clear();
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("beforeunload", () => handleCleanup(hasCleanedUp));
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("beforeunload", () =>
+        handleCleanup(hasCleanedUp),
+      );
     };
   }, []);
 
@@ -77,7 +68,13 @@ export const SessionEnd = () => {
       <CircleCheckBigIcon className="h-16 w-16 p-4 text-white rounded-full bg-green-500" />
       <h1 className="text-3xl font-bold">Session Complete!</h1>
       <p className="text-gray-500">
-        Great job practicing <b>System Design</b> at <b>Medium</b> level
+        Great job practicing{" "}
+        <b>
+          {questionAttempted?.topic_tags
+            ?.map((tag: { id: string; name: string; slug: string }) => tag.name)
+            .join(", ")}
+        </b>{" "}
+        at <b>{questionAttempted?.difficulty}</b> level
       </p>
       <div className="bg-white rounded-lg shadow-md p-4 w-1/2">
         <div className="flex items-center gap-3">
@@ -142,6 +139,7 @@ export const SessionEnd = () => {
         className="p-2 border border-gray-100 rounded-l flex gap-2 items-center hover:bg-gray-100/50 cursor-pointer"
         onClick={() => {
           navigate("/");
+          handleCleanup(hasCleanedUp);
         }}
       >
         <RotateCcwIcon className="h-4 w-4" />
