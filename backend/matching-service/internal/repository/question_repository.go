@@ -43,11 +43,13 @@ func NewQuestionRepository(baseURL string) *QuestionRepository {
 func (r *QuestionRepository) GetQuestionsByDifficultyAndTag(ctx context.Context, difficulty, tag string, size int) ([]Question, error) {
 	// Build query parameters
 	params := url.Values{}
-	params.Add("difficulty", difficulty)
-	params.Add("tag", tag)
-	params.Add("size", strconv.Itoa(size))
-
-	url := fmt.Sprintf("%s/questions?%s", r.baseURL, params.Encode())
+    params.Add("difficulty", difficulty)
+    params.Add("tag", tag)
+    params.Add("size", strconv.Itoa(size))
+    
+    queryStr := params.Encode()
+    url := fmt.Sprintf("%s/?%s", r.baseURL, queryStr)
+	fmt.Printf("Calling question service URL: %s\n", url)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {

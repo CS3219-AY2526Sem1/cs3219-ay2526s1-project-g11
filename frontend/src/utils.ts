@@ -65,3 +65,15 @@ export function getMatchParams(): MatchParams {
     return {};
   }
 }
+
+export const handleCleanup = (hasCleanedUp?: React.RefObject<boolean>) => {
+  if (hasCleanedUp?.current) return;
+  if (hasCleanedUp) hasCleanedUp.current = true;
+
+  const authToken = localStorage.getItem("authToken");
+  localStorage.clear();
+  if (authToken) {
+    localStorage.setItem("authToken", authToken);
+  }
+  sessionStorage.clear();
+};

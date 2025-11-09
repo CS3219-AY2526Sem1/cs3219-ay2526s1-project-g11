@@ -140,7 +140,7 @@ func (s *MatchingService) RequestMatch(ctx context.Context, req models.MatchRequ
 	}
 	return &models.MatchResponse{
 		MatchID:    matchID,
-		PartnerID:  users[1],
+		UserIDs:  users,
 		QuestionID: questionID,
 		Status:     "matched",
 	}, nil

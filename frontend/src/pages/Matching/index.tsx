@@ -42,8 +42,16 @@ export const MatchingPage = () => {
         difficulty: matchParams.difficulty,
       },
       {
-        onSuccess: () => {
+        onSuccess: (response) => {
           setHasJoinedQueue(true);
+          if (response.status === "matched") {
+            const partnerId = response.userIds.find(
+              (id) => id !== matchParams.userId,
+            );
+            if (partnerId) {
+              sessionStorage.setItem("partnerId", partnerId);
+            }
+          }
         },
         onError: (e) => {
           console.error("Match request failed:", e);

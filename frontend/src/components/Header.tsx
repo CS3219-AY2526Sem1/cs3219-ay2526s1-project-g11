@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 import { Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
+import { handleCleanup } from "../utils";
 import { CustomPopover } from "./CustomPopover";
 
 export const Header = () => {
@@ -19,7 +20,7 @@ export const Header = () => {
       <span className="w-10 h-10 rounded-xl bg-blue-500 text-white font-semibold text-xs flex items-center justify-center">
         <CodeXmlIcon className="h-5 w-5" />
       </span>
-      <Link to={{ pathname: "/" }}>
+      <Link to={{ pathname: "/" }} onClick={() => handleCleanup()}>
         <h3 className="text-xl font-semibold text-gray-800">PeerPrep</h3>
       </Link>
       {user && (
