@@ -12,7 +12,6 @@ type SessionContextValue = {
   question: GetQuestionByIdResponse | undefined;
   isSessionEnded: boolean;
   setIsSessionEnded: React.Dispatch<SetStateAction<boolean>>;
-  partnerId: string;
 };
 
 const SessionContext = createContext<SessionContextValue | undefined>(
@@ -25,14 +24,12 @@ export const SessionContextProvider = ({
   children,
   isSessionEnded,
   setIsSessionEnded,
-  partnerId,
 }: {
   sessionId: string;
   question: GetQuestionByIdResponse | undefined;
   children: React.ReactNode;
   isSessionEnded: boolean;
   setIsSessionEnded: React.Dispatch<SetStateAction<boolean>>;
-  partnerId: string;
 }) => {
   const { user } = useAuth();
   const socketRef = useRef<Socket>(
@@ -49,7 +46,6 @@ export const SessionContextProvider = ({
         question,
         isSessionEnded,
         setIsSessionEnded,
-        partnerId,
       }}
     >
       {children}

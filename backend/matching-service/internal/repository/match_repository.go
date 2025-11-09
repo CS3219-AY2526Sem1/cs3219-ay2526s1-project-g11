@@ -91,7 +91,7 @@ func (r *MatchRepository) GetMatch(ctx context.Context, matchID string) (*models
 
 	return &models.MatchResponse{
 		MatchID:    matchID,
-		PartnerID:  matchData.PartnerID,
+		UserIDs:    []string{matchData.PartnerID},
 		QuestionID: matchData.QuestionID,
 		Status:     "matched",
 	}, nil

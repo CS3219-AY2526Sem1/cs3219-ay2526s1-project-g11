@@ -64,10 +64,13 @@ export const Session = () => {
   });
 
   useEffect(() => {
-    if (matchData?.partnerId) {
-      sessionStorage.setItem("partnerId", matchData.partnerId);
+    if (matchData?.userIds && sessionStorage.getItem("partnerId") === null) {
+      sessionStorage.setItem(
+        "partnerId",
+        matchData.userIds.find((id) => id !== matchParams.userId) || "",
+      );
     }
-  }, [matchData]);
+  }, [matchData, matchParams.userId]);
 
   const timeString = `${minutes}:${seconds.toString().padStart(2, "0")}`;
   return (
@@ -76,7 +79,6 @@ export const Session = () => {
       question={questionData}
       isSessionEnded={isSessionEnded}
       setIsSessionEnded={setIsSessionEnded}
-      partnerId={matchData?.partnerId || ""}
     >
       <div className="mx-6 my-4">
         <div className="flex items-center mb-2 justify-center gap-2">

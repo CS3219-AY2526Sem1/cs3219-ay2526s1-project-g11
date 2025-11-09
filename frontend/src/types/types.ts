@@ -38,7 +38,7 @@ export type SessionJoinResponse = {
 
 export interface RequestMatchResponse {
   matchId: string;
-  partnerId: string;
+  userIds: string[];
   status: string;
 }
 
@@ -59,7 +59,7 @@ export type GetMatchStatusResponse =
 
 export type GetMatchDetailsResponse = {
   matchId: string;
-  partnerId: string;
+  userIds: string[];
   questionId: string;
   status: string;
 };
