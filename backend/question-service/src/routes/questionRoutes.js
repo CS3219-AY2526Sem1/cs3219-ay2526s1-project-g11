@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const {
-    getQuestionsByDifficultyAndTag,
+    getQuestionsByDifficultyAndTags,
     getQuestionById,
     createQuestion,
     updateQuestion,
@@ -11,7 +11,7 @@ const {
 
 const apiKeyAuth = require('../middlewares/authMiddleware');
 
-router.get('/', getQuestionsByDifficultyAndTag);
+router.get('/', getQuestionsByDifficultyAndTags);
 router.get('/:id', getQuestionById);
 router.post('/', apiKeyAuth, createQuestion);
 router.put('/:id', apiKeyAuth, updateQuestion);

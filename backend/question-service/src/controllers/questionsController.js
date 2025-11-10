@@ -3,20 +3,27 @@ const repository = require('../models/repository');
 // @desc Fetch questions by difficulty and topicTag
 // @route GET /questions
 // @access Public
-const getQuestionsByDifficultyAndTag = async (req, res) => {
+const getQuestionsByDifficultyAndTags = async (req, res) => {
     try {
         const { difficulty, tag, size = "5" } = req.query;
 
         if (!difficulty || !tag) {
-            return res.status(400).json({ error: "Query parameters 'difficulty' and 'tag' are required" });
+            return res
+                .status(400)
+                .json({ error: "Query parameters 'difficulty' and 'tag' are required" });
         }
+
+        // - User should pass ?tag=array&tag=math
+        const tags = Array.isArray(tag)
+            ? tag
+            : tag.split(",").map((t) => t.trim()).filter(Boolean);
 
         const sampleSize = Math.min(100, Math.max(1, parseInt(size, 10) || 5));
 
-        const rows = await repository.fetchRandomByDifficultyAndTag({
-          difficulty,
-          tag,
-          size: sampleSize,
+        const rows = await repository.fetchRandomByDifficultyAndTags({
+            difficulty,
+            tags,
+            size: sampleSize,
         });
 
         res.status(200).json(rows);
@@ -24,7 +31,7 @@ const getQuestionsByDifficultyAndTag = async (req, res) => {
         console.error(err);
         res.status(500).json({ error: "Server error" });
     }
-}
+};
 
 async function getQuestionById(req, res) {
     try {
@@ -86,7 +93,7 @@ async function deleteQuestion(req, res) {
 }
 
 module.exports = {
-    getQuestionsByDifficultyAndTag,
+    getQuestionsByDifficultyAndTags,
     getQuestionById,
     createQuestion,
     updateQuestion,
