@@ -6,9 +6,9 @@
 - HTTP Method: `GET`
 - Endpoint: https://question-service-1015946686380.asia-southeast1.run.app/questions
 - Parameters:
-  - Required: `difficulty` and `tag` query parameters
+  - Required: `difficulty` and `tag` query parameters (`tag` can be repeated for multiple tags)
   - Optional: `size` query parameter (sample size to retrieve)
-  - Example: https://question-service-1015946686380.asia-southeast1.run.app/questions?difficulty=Easy&tag=array&size=5
+  - Example: https://question-service-1015946686380.asia-southeast1.run.app/questions?difficulty=Easy&tag=array&tag=hash-table&size=5
 - Responses:
 
   | Response Code               | Explanation                                              |
