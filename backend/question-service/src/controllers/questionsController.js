@@ -14,9 +14,7 @@ const getQuestionsByDifficultyAndTags = async (req, res) => {
         }
 
         // - User should pass ?tag=array&tag=math
-        const tags = Array.isArray(tag)
-            ? tag
-            : tag.split(",").map((t) => t.trim()).filter(Boolean);
+        const tags = tag
 
         const sampleSize = Math.min(100, Math.max(1, parseInt(size, 10) || 5));
 
