@@ -14,7 +14,7 @@ config :collab_service,
 # Configures the endpoint
 config :collab_service, CollabServiceWeb.Endpoint,
   check_origin: false,
-  url: [host: "https://collab-service-1015946686380.europe-west1.run.app", port: 443, scheme: "https"],
+  url: [host: "https://collab-service-1015946686380.asia-east1.run.app", port: 443, scheme: "https"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: CollabServiceWeb.ErrorHTML, json: CollabServiceWeb.ErrorJSON],
