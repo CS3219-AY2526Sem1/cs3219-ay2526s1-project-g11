@@ -2,13 +2,13 @@ name: Elixir CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
     paths:
-      - 'backend/collab-service/**'
+      - "backend/collab-service/**"
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
     paths:
-      - 'backend/collab-service/**'
+      - "backend/collab-service/**"
 
 permissions:
   contents: read
@@ -16,14 +16,14 @@ permissions:
 jobs:
   build:
     name: build
-    runs-on: ubuntu-22.04 
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Set up Elixir
         uses: erlef/setup-beam@v1.16.0
         with:
-          elixir-version: '1.18.4'
-          otp-version: '28.0'
+          elixir-version: "1.18.4"
+          otp-version: "28.0"
       - name: Restore dependencies cache
         uses: actions/cache@v3
         with:
@@ -36,3 +36,34 @@ jobs:
       - name: Run tests
         run: mix test
         working-directory: backend/collab-service
+
+  deploy:
+    name: deploy
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1.16.0
+        with:
+          elixir-version: "1.18.4"
+          otp-version: "28.0"
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+      - name: Install dependencies
+        run: mix deps.get
+        working-directory: backend/collab-service
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }} ./backend/collab-service
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }}
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy collab-service \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }} \
+            --region asia-east1 \
+            --platform managed \
+            --port=8080
