@@ -69,7 +69,7 @@ jobs:
         run: |
           gcloud run deploy collab-service \
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }} \
-            --region europe-west1 \
+            --region asia-east1 \
             --platform managed \
             --port 4000 \
             --allow-unauthenticated \
