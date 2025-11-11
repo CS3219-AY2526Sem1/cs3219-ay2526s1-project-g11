@@ -74,4 +74,4 @@ jobs:
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }} \
             --region asia-east1 \
             --platform managed \
-            --port=8080
+            --port=4000
