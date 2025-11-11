@@ -78,6 +78,6 @@ jobs:
         run: |
           gcloud run deploy question-service \
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/question-service:${{ github.sha }} \
-            --region asia-east1 \
+            --region asia-southeast1 \
             --platform managed \
             --port 8080
