@@ -28,7 +28,7 @@ func healthCheck(c *gin.Context) {
 
 func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Origin", "https://cs3219-ay2526s1-project-g11.vercel.app")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
@@ -46,7 +46,7 @@ func setupRouter() *gin.Engine {
 
 	// Configure CORS
 	r.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*"}, // Allow all origins for development
+		AllowOrigins: []string{"https://cs3219-ay2526s1-project-g11.vercel.app"},
 		// For production, replace with specific origins:
 		// AllowOrigins:     []string{"http://localhost:3000", "https://your-frontend-domain.com"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
