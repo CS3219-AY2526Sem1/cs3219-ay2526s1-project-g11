@@ -56,6 +56,7 @@ jobs:
       - name: Install dependencies
         run: mix deps.get
         working-directory: backend/collab-service
+<<<<<<< Updated upstream
       - name: Google Auth
         uses: google-github-actions/auth@v2
         with:
@@ -64,6 +65,8 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
       - name: Configure Docker
         run: gcloud auth configure-docker
+=======
+>>>>>>> Stashed changes
       - name: Build and Push Docker Image
         run: |
           docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }} ./backend/collab-service
