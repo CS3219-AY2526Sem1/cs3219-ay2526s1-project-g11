@@ -56,6 +56,14 @@ jobs:
       - name: Install dependencies
         run: mix deps.get
         working-directory: backend/collab-service
+      - name: Google Auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      - name: Configure Docker
+        run: gcloud auth configure-docker
       - name: Build and Push Docker Image
         run: |
           docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }} ./backend/collab-service
