@@ -19,7 +19,7 @@ const updateFormSchema = z.object({
 type updateForm = z.infer<typeof updateFormSchema>;
 
 export const Profile = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [error, setError] = useState("");
 
   const {
@@ -36,7 +36,7 @@ export const Profile = () => {
 
   const mutation = useMutation({
     mutationFn: (data: updateForm) =>
-      userUpdate({ userId: user?.id || "", ...data }),
+      userUpdate({ userId: user?.id || "", token: token || "", ...data }),
     onSuccess: () => alert("Your profile has been updated!"),
     onError: (error) => {
       if (error instanceof AxiosError) {
@@ -76,6 +76,7 @@ export const Profile = () => {
               placeholder="Email"
               {...register("email")}
               required
+              disabled
             />
             <p className="text-sm text-red-500">{error}</p>
             <SubmitButton disabled={mutation.isPending || !isDirty}>

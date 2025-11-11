@@ -7,7 +7,6 @@ import z from "zod";
 import { userStatistics } from "../../api/UserService";
 import { SubmitButton } from "../../components/SubmitButton";
 import { useAuth } from "../../context/AuthContext";
-import { Card } from "./Components/Card";
 import { MainCard } from "./Components/MainCard";
 import { RecentSessions } from "./Components/RecentSessions";
 import {
@@ -124,23 +123,6 @@ const Home = () => {
             </div>
             <div className="lg:flex-1 md:flex-0">
               <div className="flex flex-col gap-2">
-                <Card>
-                  <div className="flex flex-row items-center gap-2">
-                    <Users />
-                    <h2 className="font-bold">Active Now</h2>
-                  </div>
-                  <div className="flex flex-row items-center gap-2">
-                    {/* credits https://www.sanyam.xyz/blogs/creating-blinking-dot-effect-using-tailwind */}
-                    <div className="relative inline-flex">
-                      <div className="rounded-full bg-green-400 h-[8px] w-[8px] inline-block mr-2"></div>
-                      <div className="absolute animate-ping rounded-full bg-green-400 h-[8px] w-[8px] mr-2"></div>
-                    </div>
-                    <p className="font-semibold text-sm">247 Students online</p>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    Average wait time: ~30 seconds
-                  </p>
-                </Card>
                 <RecentSessions
                   sessions={sessionStatistics?.data.sessions || []}
                 />
