@@ -1,6 +1,6 @@
 // biome-ignore-all lint/security/noDangerouslySetInnerHtml: content is sanitized by DOMPurify
 import DOMPurify from "dompurify";
-import { CodeIcon, SparklesIcon } from "lucide-react";
+import { CodeIcon } from "lucide-react";
 import { useSessionContext } from "../../../../hooks/useSessionContext";
 import { SessionEditor } from "./components/SessionEditor";
 
@@ -29,20 +29,6 @@ export const SessionQuestion = () => {
           </div>
           <div className="flex items-center text-sm gap-2">
             <span>Shared Code Editor</span>
-            <button
-              type="button"
-              className="ml-auto cursor-pointer bg-gray-100 border hover:bg-gray-200 active:bg-gray-300 border-gray-300 px-2 py-1 rounded-lg flex gap-2 items-center justify-center"
-            >
-              <SparklesIcon className="h-3 w-3" />
-              Explain Code
-            </button>
-            <button
-              type="button"
-              className="cursor-pointer bg-gray-100 border hover:bg-gray-200 active:bg-gray-300 border-gray-300 px-2 py-1 rounded-lg flex gap-2 items-center justify-center"
-            >
-              <SparklesIcon className="h-3 w-3" />
-              Get Hint
-            </button>
           </div>
           <SessionEditor />
         </div>
