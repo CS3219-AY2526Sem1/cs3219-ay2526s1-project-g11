@@ -1,4 +1,4 @@
-name: Elixir CI
+name: Elixir CI/CD
 
 on:
   push:
@@ -15,63 +15,62 @@ permissions:
 
 jobs:
   build:
-    name: build
+    name: Run Tests
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Elixir
         uses: erlef/setup-beam@v1.16.0
         with:
           elixir-version: "1.18.4"
           otp-version: "28.0"
+
       - name: Restore dependencies cache
         uses: actions/cache@v3
         with:
-          path: deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          path: backend/collab-service/deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('backend/collab-service/mix.lock') }}
           restore-keys: ${{ runner.os }}-mix-
+
       - name: Install dependencies
         run: mix deps.get
         working-directory: backend/collab-service
+
       - name: Run tests
         run: mix test
         working-directory: backend/collab-service
 
   deploy:
-    name: deploy
+    name: Deploy to Cloud Run
     runs-on: ubuntu-22.04
+    needs: build
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Elixir
-        uses: erlef/setup-beam@v1.16.0
-        with:
-          elixir-version: "1.18.4"
-          otp-version: "28.0"
-      - name: Restore dependencies cache
-        uses: actions/cache@v3
-        with:
-          path: deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
-      - name: Install dependencies
-        run: mix deps.get
-        working-directory: backend/collab-service
-      - name: Google Auth
+
+      - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-      - name: Set up Cloud SDK
+
+      - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
-      - name: Configure Docker
+
+      - name: Configure Docker auth for GCP
         run: gcloud auth configure-docker
+
       - name: Build and Push Docker Image
+        working-directory: backend/collab-service
         run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }} ./backend/collab-service
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }} .
           docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }}
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy collab-service \
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/collab-service:${{ github.sha }} \
             --region europe-west1 \
             --platform managed \
-            --port=443
+            --port 4000 \
+            --allow-unauthenticated \
+            --set-env-vars "MIX_ENV=prod,REDIS_URL=redis://10.99.160.3:6379"
