@@ -11,7 +11,6 @@ on:
       - master
     paths:
       - "backend/question-service/**"
-    workflow_dispatch:
 
 jobs:
   build:
