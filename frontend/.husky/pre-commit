@@ -1,0 +1,49 @@
+# Tool: ChatGPT (model: GPT-5), date: 2025-09-28
+# Prompt: Generate a pre-commit hook script for a monorepo with frontend and backend. Only lint the frontend for now, the script should only process staged files in the frontend directory.
+# Author review: I validated the processes, adjusted the directory paths, and removed redundant lines.
+
+# Get staged frontend files
+FRONTEND_FILES=$(git diff --cached --name-only | grep "^frontend/" || true)
+
+if [ -n "$FRONTEND_FILES" ]; then
+    echo "🚀 Pre-commit hook running..."
+    echo "📋 Frontend files staged:"
+    echo "$FRONTEND_FILES" | head -5
+    
+    # Get the frontend directory path
+    SCRIPT_DIR="$(dirname "$0")"
+    FRONTEND_DIR="$(dirname "$SCRIPT_DIR")"
+    
+    # Check if frontend tools are available
+    if ! command -v pnpm >/dev/null 2>&1; then
+        echo "⚠️  pnpm not found - skipping frontend linting"
+        echo "   Install with: npm install -g pnpm"
+        echo "   Then run: cd frontend && pnpm install"
+        exit 0  # Don't fail the commit
+    fi
+    
+    if [ ! -f "$FRONTEND_DIR/package.json" ]; then
+        echo "⚠️  Frontend not set up - skipping linting"
+        echo "   Run: cd frontend && pnpm install"
+        exit 0  # Don't fail the commit
+    fi
+    
+    echo "🔍 Running TypeScript check..."
+    cd frontend && pnpm tsc --noEmit
+    if [ $? -ne 0 ]; then
+        echo "❌ TypeScript check failed"
+        exit 1
+    fi
+
+    echo "🔍 Running lint-staged..."
+    pnpm lint-staged
+    if [ $? -ne 0 ]; then
+        echo "❌ Linting failed"
+        exit 1
+    fi
+    
+    echo "✅ Frontend linting completed"
+    echo "✅ Pre-commit hook completed"
+else
+    echo "ℹ️  No frontend files staged, skipping frontend checks"
+fi

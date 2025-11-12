@@ -1,0 +1,59 @@
+name: AI Service CI/CD
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'backend/ai-service/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'backend/ai-service/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.8.17"
+
+      - name: Install dependencies
+        run: uv sync
+        working-directory: backend/ai-service
+
+      - name: Lint
+        run: uv run ruff check .
+        working-directory: backend/ai-service
+        continue-on-error: true
+
+      - name: Test FastAPI app imports
+        run: |
+          uv run python -c "
+          try:
+              from app.main import app
+              print('✅ FastAPI app imports successfully')
+              print(f'✅ App title: {app.title}')
+          except Exception as e:
+              print(f'❌ Import failed: {e}')
+              exit(1)
+          "
+        working-directory: backend/ai-service
+
+      - name: Test API endpoints (basic)
+        run: |
+          uv run python -c "
+          from fastapi.testclient import TestClient
+          from app.main import app
+          client = TestClient(app)
+          response = client.get('/health')
+          assert response.status_code == 200, 'Health endpoint failed'
+          print('✅ Health endpoint works')
+          "
+        working-directory: backend/ai-service
