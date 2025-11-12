@@ -8,17 +8,17 @@
 
 2. After setting up, go to the Database Deployment Page. You would see a list of the Databases you have set up. Select `Connect` on the cluster you just created earlier on for User Service.
 
-    ![alt text](./GuideAssets/ConnectCluster.png)
+   ![alt text](./GuideAssets/ConnectCluster.png)
 
 3. Select the `Drivers` option, as we have to link to a Node.js App (User Service).
 
-    ![alt text](./GuideAssets/DriverSelection.png)
+   ![alt text](./GuideAssets/DriverSelection.png)
 
 4. Select `Node.js` in the `Driver` pull-down menu, and copy the connection string.
 
-    Notice, you may see `<password>` in this connection string. We will be replacing this with the admin account password that we created earlier on when setting up the Shared Cluster.
+   Notice, you may see `<password>` in this connection string. We will be replacing this with the admin account password that we created earlier on when setting up the Shared Cluster.
 
-    ![alt text](./GuideAssets/ConnectionString.png)
+   ![alt text](./GuideAssets/ConnectionString.png)
 
 5. In the `user-service` directory, create a copy of the `.env.sample` file and name it `.env`.
 
@@ -45,6 +45,7 @@
 - Endpoint: http://localhost:3001/users
 
 - Body
+
   - Required: `username` (string), `email` (string), `password` (string)
 
     ```json
@@ -57,12 +58,12 @@
 
 - Responses:
 
-    | Response Code               | Explanation                                           |
-    |-----------------------------|-------------------------------------------------------|
-    | 201 (Created)               | User created successfully, created user data returned |
-    | 400 (Bad Request)           | Missing fields                                        |
-    | 409 (Conflict)              | Duplicate username or email encountered               |
-    | 500 (Internal Server Error) | Database or server error                              |
+  | Response Code               | Explanation                                           |
+  | --------------------------- | ----------------------------------------------------- |
+  | 201 (Created)               | User created successfully, created user data returned |
+  | 400 (Bad Request)           | Missing fields                                        |
+  | 409 (Conflict)              | Duplicate username or email encountered               |
+  | 500 (Internal Server Error) | Database or server error                              |
 
 ### Get User
 
@@ -75,30 +76,30 @@
 - Endpoint: http://localhost:3001/users/{userId}
 
 - Parameters
-    - Required: `userId` path parameter
-    - Example: `http://localhost:3001/users/60c72b2f9b1d4c3a2e5f8b4c`
+
+  - Required: `userId` path parameter
+  - Example: `http://localhost:3001/users/60c72b2f9b1d4c3a2e5f8b4c`
 
 - <a name="auth-header">Headers</a>
-  
-    - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
-    
-    - Explanation: This endpoint requires the client to include a JWT (JSON Web Token) in the HTTP request header for authentication and authorization. This token is generated during the authentication process (i.e., login) and contains information about the user's identity. The server verifies this token to ensure that the client is authorized to access the data.
-    
-    - Auth Rules:
-    
-        - Admin users: Can retrieve any user's data. The server verifies the user associated with the JWT token is an admin user and allows access to the requested user's data.
-          
-        - Non-admin users: Can only retrieve their own data. The server checks if the user ID in the request URL matches the ID of the user associated with the JWT token. If it matches, the server returns the user's own data.
-    
+
+  - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
+
+  - Explanation: This endpoint requires the client to include a JWT (JSON Web Token) in the HTTP request header for authentication and authorization. This token is generated during the authentication process (i.e., login) and contains information about the user's identity. The server verifies this token to ensure that the client is authorized to access the data.
+
+  - Auth Rules:
+
+    - Admin users: Can retrieve any user's data. The server verifies the user associated with the JWT token is an admin user and allows access to the requested user's data.
+    - Non-admin users: Can only retrieve their own data. The server checks if the user ID in the request URL matches the ID of the user associated with the JWT token. If it matches, the server returns the user's own data.
+
 - Responses:
 
-    | Response Code               | Explanation                                              |
-    |-----------------------------|----------------------------------------------------------|
-    | 200 (OK)                    | Success, user data returned                              |
-    | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT         |
-    | 403 (Forbidden)             | Access denied for non-admin users accessing others' data |
-    | 404 (Not Found)             | User with the specified ID not found                     |
-    | 500 (Internal Server Error) | Database or server error                                 |
+  | Response Code               | Explanation                                              |
+  | --------------------------- | -------------------------------------------------------- |
+  | 200 (OK)                    | Success, user data returned                              |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT         |
+  | 403 (Forbidden)             | Access denied for non-admin users accessing others' data |
+  | 404 (Not Found)             | User with the specified ID not found                     |
+  | 500 (Internal Server Error) | Database or server error                                 |
 
 ### Get All Users
 
@@ -106,21 +107,21 @@
 - HTTP Method: `GET`
 - Endpoint: http://localhost:3001/users
 - Headers
-    - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
-    - Auth Rules:
 
-        - Admin users: Can retrieve all users' data. The server verifies the user associated with the JWT token is an admin user and allows access to all users' data.
-          
-        - Non-admin users: Not allowed access.
+  - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
+  - Auth Rules:
+
+    - Admin users: Can retrieve all users' data. The server verifies the user associated with the JWT token is an admin user and allows access to all users' data.
+    - Non-admin users: Not allowed access.
 
 - Responses:
 
-    | Response Code               | Explanation                                      |
-    |-----------------------------|--------------------------------------------------|
-    | 200 (OK)                    | Success, all user data returned                  |
-    | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT |
-    | 403 (Forbidden)             | Access denied for non-admin users                |
-    | 500 (Internal Server Error) | Database or server error                         |
+  | Response Code               | Explanation                                      |
+  | --------------------------- | ------------------------------------------------ |
+  | 200 (OK)                    | Success, all user data returned                  |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT |
+  | 403 (Forbidden)             | Access denied for non-admin users                |
+  | 500 (Internal Server Error) | Database or server error                         |
 
 ### Update User
 
@@ -131,9 +132,11 @@
 - Endpoint: http://localhost:3001/users/{userId}
 
 - Parameters
+
   - Required: `userId` path parameter
 
 - Body
+
   - At least one of the following fields is required: `username` (string), `email` (string), `password` (string)
 
     ```json
@@ -145,24 +148,24 @@
     ```
 
 - Headers
-    - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
-    - Auth Rules:
 
-        - Admin users: Can update any user's data. The server verifies the user associated with the JWT token is an admin user and allows the update of requested user's data.
-          
-        - Non-admin users: Can only update their own data. The server checks if the user ID in the request URL matches the ID of the user associated with the JWT token. If it matches, the server updates the user's own data.
+  - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
+  - Auth Rules:
+
+    - Admin users: Can update any user's data. The server verifies the user associated with the JWT token is an admin user and allows the update of requested user's data.
+    - Non-admin users: Can only update their own data. The server checks if the user ID in the request URL matches the ID of the user associated with the JWT token. If it matches, the server updates the user's own data.
 
 - Responses:
 
-    | Response Code               | Explanation                                             |
-    |-----------------------------|---------------------------------------------------------|
-    | 200 (OK)                    | User updated successfully, updated user data returned   |
-    | 400 (Bad Request)           | Missing fields                                          |
-    | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT        |
-    | 403 (Forbidden)             | Access denied for non-admin users updating others' data |
-    | 404 (Not Found)             | User with the specified ID not found                    |
-    | 409 (Conflict)              | Duplicate username or email encountered                 |
-    | 500 (Internal Server Error) | Database or server error                                |
+  | Response Code               | Explanation                                             |
+  | --------------------------- | ------------------------------------------------------- |
+  | 200 (OK)                    | User updated successfully, updated user data returned   |
+  | 400 (Bad Request)           | Missing fields                                          |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT        |
+  | 403 (Forbidden)             | Access denied for non-admin users updating others' data |
+  | 404 (Not Found)             | User with the specified ID not found                    |
+  | 409 (Conflict)              | Duplicate username or email encountered                 |
+  | 500 (Internal Server Error) | Database or server error                                |
 
 ### Update User Privilege
 
@@ -173,9 +176,11 @@
 - Endpoint: http://localhost:3001/users/{userId}
 
 - Parameters
+
   - Required: `userId` path parameter
 
 - Body
+
   - Required: `isAdmin` (boolean)
 
     ```json
@@ -185,24 +190,25 @@
     ```
 
 - Headers
-    - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
-    - Auth Rules:
 
-        - Admin users: Can update any user's privilege. The server verifies the user associated with the JWT token is an admin user and allows the privilege update.
-        - Non-admin users: Not allowed access.
+  - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
+  - Auth Rules:
+
+    - Admin users: Can update any user's privilege. The server verifies the user associated with the JWT token is an admin user and allows the privilege update.
+    - Non-admin users: Not allowed access.
 
 > :bulb: You may need to manually assign admin status to the first user by directly editing the database document before using this endpoint.
 
 - Responses:
 
-    | Response Code               | Explanation                                                     |
-    |-----------------------------|-----------------------------------------------------------------|
-    | 200 (OK)                    | User privilege updated successfully, updated user data returned |
-    | 400 (Bad Request)           | Missing fields                                                  |
-    | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT                |
-    | 403 (Forbidden)             | Access denied for non-admin users                               |
-    | 404 (Not Found)             | User with the specified ID not found                            |
-    | 500 (Internal Server Error) | Database or server error                                        |
+  | Response Code               | Explanation                                                     |
+  | --------------------------- | --------------------------------------------------------------- |
+  | 200 (OK)                    | User privilege updated successfully, updated user data returned |
+  | 400 (Bad Request)           | Missing fields                                                  |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT                |
+  | 403 (Forbidden)             | Access denied for non-admin users                               |
+  | 404 (Not Found)             | User with the specified ID not found                            |
+  | 500 (Internal Server Error) | Database or server error                                        |
 
 ### Delete User
 
@@ -212,6 +218,7 @@
 - Parameters
 
   - Required: `userId` path parameter
+
 - Headers
 
   - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
@@ -221,15 +228,16 @@
     - Admin users: Can delete any user's data. The server verifies the user associated with the JWT token is an admin user and allows the deletion of requested user's data.
 
     - Non-admin users: Can only delete their own data. The server checks if the user ID in the request URL matches the ID of the user associated with the JWT token. If it matches, the server deletes the user's own data.
+
 - Responses:
 
-    | Response Code               | Explanation                                             |
-    |-----------------------------|---------------------------------------------------------|
-    | 200 (OK)                    | User deleted successfully                               |
-    | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT        |
-    | 403 (Forbidden)             | Access denied for non-admin users deleting others' data |
-    | 404 (Not Found)             | User with the specified ID not found                    |
-    | 500 (Internal Server Error) | Database or server error                                |
+  | Response Code               | Explanation                                             |
+  | --------------------------- | ------------------------------------------------------- |
+  | 200 (OK)                    | User deleted successfully                               |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT        |
+  | 403 (Forbidden)             | Access denied for non-admin users deleting others' data |
+  | 404 (Not Found)             | User with the specified ID not found                    |
+  | 500 (Internal Server Error) | Database or server error                                |
 
 ### Login
 
@@ -237,6 +245,7 @@
 - HTTP Method: `POST`
 - Endpoint: http://localhost:3001/auth/login
 - Body
+
   - Required: `email` (string), `password` (string)
 
     ```json
@@ -248,12 +257,53 @@
 
 - Responses:
 
-    | Response Code               | Explanation                                        |
-    |-----------------------------|----------------------------------------------------|
-    | 200 (OK)                    | Login successful, JWT token and user data returned |
-    | 400 (Bad Request)           | Missing fields                                     |
-    | 401 (Unauthorized)          | Incorrect email or password                        |
-    | 500 (Internal Server Error) | Database or server error                           |
+  | Response Code               | Explanation                                        |
+  | --------------------------- | -------------------------------------------------- |
+  | 200 (OK)                    | Login successful, JWT token and user data returned |
+  | 400 (Bad Request)           | Missing fields                                     |
+  | 401 (Unauthorized)          | Incorrect email or password                        |
+  | 500 (Internal Server Error) | Database or server error                           |
+
+### Forgot Password
+
+- This endpoint allows users to request a password reset link via email.
+
+- HTTP Method: `POST`
+
+- Endpoint: http://localhost:3001/auth/forgot-password
+
+- Body
+
+  - Required: `email` (string)
+
+    ```json
+    {
+      "email": "user@example.com"
+    }
+    ```
+
+- Responses:
+
+  | Response Code               | Explanation                                |
+  | --------------------------- | ------------------------------------------ |
+  | 200 (OK)                    | Reset link sent to user email successfully |
+  | 400 (Bad Request)           | Missing email in request body              |
+  | 401 (Unauthorized)          | No accounts found with the provided email  |
+  | 500 (Internal Server Error) | Database or email service error            |
+
+- Response Body (Success):
+
+  ```json
+  {
+    "message": "Reset link sent to user email"
+  }
+  ```
+
+- Notes:
+  - The reset link contains a JWT token valid for 15 minutes
+  - The link format: `http://localhost:3001//forgot-password/{token}`
+  - Email is sent via Gmail SMTP service
+  - Users must click the link within 15 minutes to reset their password
 
 ### Verify Token
 
@@ -261,12 +311,205 @@
 - HTTP Method: `GET`
 - Endpoint: http://localhost:3001/auth/verify-token
 - Headers
+
   - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
 
 - Responses:
 
-    | Response Code               | Explanation                                        |
-    |-----------------------------|----------------------------------------------------|
-    | 200 (OK)                    | Token verified, authenticated user's data returned |
-    | 401 (Unauthorized)          | Missing/invalid/expired JWT                        |
-    | 500 (Internal Server Error) | Database or server error                           |
+  | Response Code               | Explanation                                        |
+  | --------------------------- | -------------------------------------------------- |
+  | 200 (OK)                    | Token verified, authenticated user's data returned |
+  | 401 (Unauthorized)          | Missing/invalid/expired JWT                        |
+  | 500 (Internal Server Error) | Database or server error                           |
+
+### Get User Statistics
+
+- This endpoint allows retrieval of aggregated statistics for a user's coding sessions.
+
+- HTTP Method: `GET`
+
+- Endpoint: http://localhost:3001/users/{userId}/statistics
+
+- Parameters
+
+  - Required: `userId` path parameter
+
+- Headers
+
+  - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
+
+- Response includes:
+
+  - `totalSessions`: Total number of coding sessions
+  - `hoursPracticed`: Total hours spent in sessions
+  - `peersMet`: Number of unique peers encountered
+  - `sessions`: Array of sessions with peer information
+
+- Responses:
+
+  | Response Code               | Explanation                                      |
+  | --------------------------- | ------------------------------------------------ |
+  | 200 (OK)                    | Success, user statistics returned                |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT |
+  | 404 (Not Found)             | User with the specified ID not found             |
+  | 500 (Internal Server Error) | Database or server error                         |
+
+  ### Get User Sessions
+
+- This endpoint allows retrieval of all sessions for a specific user.
+
+- HTTP Method: `GET`
+
+- Endpoint: http://localhost:3001/users/{userId}/sessions
+
+- Parameters
+
+  - Required: `userId` path parameter
+
+- Headers
+
+  - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
+
+- Responses:
+
+  | Response Code               | Explanation                                      |
+  | --------------------------- | ------------------------------------------------ |
+  | 200 (OK)                    | Success, user sessions data returned             |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT |
+  | 404 (Not Found)             | User with the specified ID not found             |
+  | 500 (Internal Server Error) | Database or server error                         |
+
+### Add User Session
+
+- This endpoint allows adding a new session record to a user's session history.
+
+- HTTP Method: `POST`
+
+- Endpoint: http://localhost:3001/users/{userId}/sessions
+
+- Parameters
+
+  - Required: `userId` path parameter
+
+- Body
+
+  - Required: `session` (object)
+
+    ```json
+    {
+      "session": {
+        "peerUserId": "60c72b2f9b1d4c3a2e5f8b4c",
+        "startTimestamp": "2023-10-01T10:00:00Z",
+        "endTimestamp": "2023-10-01T11:00:00Z",
+        "duration": 3600,
+        "questionId": "60c72b2f9b1d4c3a2e5f8b4d",
+        "question": {
+          "title": "Two Sum",
+          "difficulty": "easy",
+          "description": "Find two numbers that add up to target"
+        }
+      }
+    }
+    ```
+
+- Headers
+
+  - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
+
+- Responses:
+
+  | Response Code               | Explanation                                            |
+  | --------------------------- | ------------------------------------------------------ |
+  | 200 (OK)                    | Session added successfully, updated user data returned |
+  | 400 (Bad Request)           | Missing or malformed session data                      |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT       |
+  | 404 (Not Found)             | User with the specified ID not found                   |
+  | 500 (Internal Server Error) | Database or server error                               |
+
+### Delete User Session
+
+- This endpoint allows deletion of a specific session from a user's session history.
+
+- HTTP Method: `DELETE`
+
+- Endpoint: http://localhost:3001/users/{userId}/sessions/{sessionId}
+
+- Parameters
+
+  - Required: `userId` path parameter
+  - Required: `sessionId` path parameter
+
+- Headers
+
+  - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
+
+- Responses:
+
+  | Response Code               | Explanation                                      |
+  | --------------------------- | ------------------------------------------------ |
+  | 200 (OK)                    | Session deleted successfully                     |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT |
+  | 404 (Not Found)             | User or Session with the specified ID not found  |
+  | 500 (Internal Server Error) | Database or server error                         |
+
+### Get Completed Questions
+
+- This endpoint allows retrieval of all questions completed by a specific user.
+
+- HTTP Method: `GET`
+
+- Endpoint: http://localhost:3001/users/{userId}/completed-questions
+
+- Parameters
+
+  - Required: `userId` path parameter
+
+- Headers
+
+  - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
+
+- Responses:
+
+  | Response Code               | Explanation                                      |
+  | --------------------------- | ------------------------------------------------ |
+  | 200 (OK)                    | Success, completed questions data returned       |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT |
+  | 404 (Not Found)             | User with the specified ID not found             |
+  | 500 (Internal Server Error) | Database or server error                         |
+
+### Mark Question as Completed
+
+- This endpoint allows marking a question as completed for a specific user and session.
+
+- HTTP Method: `POST`
+
+- Endpoint: http://localhost:3001/users/{userId}/completed-questions
+
+- Parameters
+
+  - Required: `userId` path parameter
+
+- Body
+
+  - Required: `questionId` (string), `sessionId` (string)
+
+    ```json
+    {
+      "questionId": "60c72b2f9b1d4c3a2e5f8b4d",
+      "sessionId": "60c72b2f9b1d4c3a2e5f8b4e"
+    }
+    ```
+
+- Headers
+
+  - Required: `Authorization: Bearer <JWT_ACCESS_TOKEN>`
+
+- Responses:
+
+  | Response Code               | Explanation                                      |
+  | --------------------------- | ------------------------------------------------ |
+  | 200 (OK)                    | Question marked as completed successfully        |
+  | 400 (Bad Request)           | Missing questionId or sessionId                  |
+  | 401 (Unauthorized)          | Access denied due to missing/invalid/expired JWT |
+  | 404 (Not Found)             | User or Session with the specified ID not found  |
+  | 500 (Internal Server Error) | Database or server error                         |
