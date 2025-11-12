@@ -29,7 +29,7 @@ defmodule CollabServiceWeb.Router do
     get "/sessions/:id", SessionController, :show
   end
 
-  scope "/healthz", CollabServiceWeb do
+  scope "/health", CollabServiceWeb do
     pipe_through :api
     get "/", HealthController, :index
   end
