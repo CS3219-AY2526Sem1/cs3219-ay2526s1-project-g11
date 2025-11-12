@@ -77,3 +77,16 @@ export const handleCleanup = (hasCleanedUp?: React.RefObject<boolean>) => {
   }
   sessionStorage.clear();
 };
+
+export const throttle = (func: (...args: any[]) => void, limit: number) => {
+  let isThrottled = false;
+  return (...args: any[]) => {
+    if (!isThrottled) {
+      func(...args);
+      isThrottled = true;
+      setTimeout(() => {
+        isThrottled = false;
+      }, limit);
+    }
+  };
+};
