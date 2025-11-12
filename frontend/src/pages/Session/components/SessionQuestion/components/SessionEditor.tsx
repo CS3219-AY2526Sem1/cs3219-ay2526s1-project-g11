@@ -8,7 +8,7 @@ import type {
   CodeUpdateResponse,
   SessionJoinResponse,
 } from "../../../../../types/types";
-import { computeCodeDiff } from "../../../../../utils";
+import { computeCodeDiff, throttle } from "../../../../../utils";
 
 interface SessionEditorProps {
   language?: string;
@@ -126,7 +126,7 @@ export const SessionEditor = ({
     }
   }, [isSessionEnded]);
 
-  const handleCodeChange = (value: string | undefined) => {
+  const handleCodeChange = useCallback((value: string | undefined) => {
     if (localApply.current) {
       localApply.current = false;
       return;
@@ -146,7 +146,9 @@ export const SessionEditor = ({
         shadowRef.current = newCode;
       }
     }
-  };
+  }, []);
+
+  const throttledHandleCodeChange = throttle(handleCodeChange, 500);
 
   return (
     <div className="flex flex-col gap-2 h-1/2">
@@ -155,7 +157,7 @@ export const SessionEditor = ({
           height="50vh"
           theme="vs-dark"
           language={language}
-          onChange={handleCodeChange}
+          onChange={throttledHandleCodeChange}
           onMount={handleEditorDidMount}
           options={{
             cursorSmoothCaretAnimation: "on",
