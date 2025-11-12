@@ -11,16 +11,17 @@ spec:
     spec:
       containers:
         - name: user
-          image: user-service:dev      # built into minikube
-          ports: [{ containerPort: 8004 }]
-          readinessProbe:
-            httpGet: { path: /healthz, port: 8004 }
-            initialDelaySeconds: 2
-            periodSeconds: 3
+          image: asia-southeast1-docker.pkg.dev/peerprep2/backend-microservices/user-service:dev      # built into minikube
+          ports: [{ containerPort: 3001 }]
           resources:  
             limits:
               memory: "1Gi"
               cpu: "250m"
+          env:
+            - name: PORT
+              value: "8081"
+            - name: MONGO_URI
+              value: "mongodb://mongoadmin:mongopass@user-mongo:27017/userdb?authSource=admin"
 ---
 apiVersion: v1
 kind: Service
@@ -31,4 +32,4 @@ spec:
   selector: { app: user-service }
   ports:
     - port: 80
-      targetPort: 8004
+      targetPort: 3001

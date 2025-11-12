@@ -1,0 +1,38 @@
+# 20-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-ingress
+  namespace: app
+  annotations:
+    kubernetes.io/ingress.class: "gce"                   # GKE HTTP(S) LB
+
+spec:
+  rules:
+    - host: api.yourdomain.com
+      http:
+        paths:
+          - path: /users
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port: { number: 80 }
+          - path: /questions
+            pathType: Prefix
+            backend:
+              service:
+                name: question-service
+                port: { number: 80 }
+          - path: /matching
+            pathType: Prefix
+            backend:
+              service:
+                name: matching-service
+                port: { number: 80 }
+          - path: /collab
+            pathType: Prefix
+            backend:
+              service:
+                name: collab-service
+                port: { number: 4000 }   # or 80 if your Service maps to it

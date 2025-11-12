@@ -7,6 +7,6 @@ spec:
     app: matching-service
   ports:
     - protocol: TCP
-      port: 8002
-      targetPort: 8002
+      port: 8080
+      targetPort: 8080
   type: ClusterIP

@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: question-pg-pvc
+  namespace: app
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: question-postgres
+  namespace: app
+spec:
+  selector: { app: question-postgres }
+  ports:
+    - name: pg
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: question-postgres
+  namespace: app
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: question-postgres } }
+  template:
+    metadata: { labels: { app: question-postgres } }
+    spec:
+      # If you created the configmap for init scripts, this initContainer
+      # copies them to /docker-entrypoint-initdb.d so the postgres image will run them on first boot.
+      initContainers:
+        - name: copy-init
+          image: busybox:1.36
+          command: ["sh","-c","cp /cm/* /docker-entrypoint-initdb.d/ || true"]
+          volumeMounts:
+            - name: init-scripts
+              mountPath: /cm
+            - name: pgdata
+              mountPath: /docker-entrypoint-initdb.d
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports: [{ containerPort: 5432 }]
+          env:
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: question-pg-secret, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: question-pg-secret, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: question-pg-secret, key: POSTGRES_DB } }
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: pgdata
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec: { command: ["pg_isready","-U","postgres","-d","questiondb","-h","127.0.0.1"] }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: question-pg-pvc }
+        - name: pgdata
+          emptyDir: {}
+        - name: init-scripts
+          configMap:
+            name: question-pg-init
+            optional: true

@@ -11,16 +11,15 @@ spec:
     spec:
       containers:
         - name: collab
-          image: collab-service:dev      # built into minikube
+          image: asia-southeast1-docker.pkg.dev/peerprep2/backend-microservices/collab-service:dev      # built into minikube
           ports: [{ containerPort: 4000 }]
-          readinessProbe:
-            httpGet: { path: /healthz, port: 4000 }
-            initialDelaySeconds: 2
-            periodSeconds: 3
           resources:  
             limits:
               memory: "1Gi"
               cpu: "250m"
+          envFrom:
+            - secretRef:
+                name: collab-secrets
 ---
 apiVersion: v1
 kind: Service

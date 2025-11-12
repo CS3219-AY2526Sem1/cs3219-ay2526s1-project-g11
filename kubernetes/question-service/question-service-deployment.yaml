@@ -11,12 +11,8 @@ spec:
     spec:
       containers:
         - name: question
-          image: question-service:dev      # built into minikube
-          ports: [{ containerPort: 8003 }]
-          readinessProbe:
-            httpGet: { path: /healthz, port: 8003 }
-            initialDelaySeconds: 2
-            periodSeconds: 3
+          image: asia-southeast1-docker.pkg.dev/peerprep2/backend-microservices/question-service:dev      # built into minikube
+          ports: [{ containerPort: 8080 }]
           resources:  
             limits:
               memory: "1Gi"
@@ -31,4 +27,4 @@ spec:
   selector: { app: question-service }
   ports:
     - port: 80
-      targetPort: 8003
+      targetPort: 8080
